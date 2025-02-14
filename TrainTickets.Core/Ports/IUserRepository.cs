@@ -10,6 +10,10 @@ public interface IUserRepository
     /// <returns><see cref="UserEntity"/></returns>
     Task<IEnumerable<UserEntity>> GetAllUserAsync();
 
-
     Task<UserEntity> GetUserByIdAsync(int id);
+
+    UserEntity AddUser(UserEntity entity);
+
+    Task<UserEntity> GetUserByLoginAsync(string login);
+
 }

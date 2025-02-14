@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TrainTickets.Infrastructure;
-using TrainTickets.Infrastructure.Adapters.Internal;
+
 using TrainTickets.Infrastructure.Adapters.Postgres;
 using TrainTickets.UI.Application.Test.Handlers;
 using TrainTickets.UI.Application.Test.Mappers;
@@ -37,7 +37,7 @@ public class Startup
             //Регистрация сервисов
              services.AddTransient<IUserHandler, UserHandler>();
              services.AddTransient<IUserMapper, UserMapper>();
-             services.AddTransient<IUserRepository, TestPostgresRepository>();
+             services.AddTransient<IUserRepository, UserPostgresRepository>();
 
             // services.AddTransient<IGeoClient>(x => new Client(geoServiceGrpcHost));
             

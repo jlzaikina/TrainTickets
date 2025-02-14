@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 
 namespace TrainTickets.UI.Entities;
 
@@ -8,9 +9,12 @@ namespace TrainTickets.UI.Entities;
 public class UserEntity
 {
     [Key]
-    public int Id { get; set; }
+    public long Id { get; set; }
     public string Login { get; set; }
     public string Email { get; set; }
-    public int Password { get; set; }
+    public string Password { get; set; }
+    public string Phone { get; set; }
+    public string Surname{ get; set; }
+    public string Name { get; set; }
 
 }   
