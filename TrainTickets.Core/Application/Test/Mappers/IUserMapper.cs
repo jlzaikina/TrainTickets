@@ -9,4 +9,8 @@ public interface IUserMapper
 
     UserEntity Map(RegisterUserRequest request);
 
+    SessionEntity Map1(UserEntity request);
+
+    SessionDto Map(SessionEntity request);
+
 }

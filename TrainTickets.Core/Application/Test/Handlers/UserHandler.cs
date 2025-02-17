@@ -1,14 +1,16 @@
 ﻿using TrainTickets.UI.Application.Test.Mappers;
 using TrainTickets.UI.Domain.User;
+using TrainTickets.UI.Entities;
 using TrainTickets.UI.Ports;
 
 namespace TrainTickets.UI.Application.Test.Handlers;
 
-// тут пишется логика
+/// <inheritdoc/>
 public class UserHandler : IUserHandler
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserMapper _userMapper;
+    private readonly ISessionRepository _sessionRepository;
 
     public UserHandler(IUserRepository userRepository, IUserMapper userMapper)
     {
@@ -19,26 +21,12 @@ public class UserHandler : IUserHandler
     public async Task<IEnumerable<UserDto>> GetAllUserAsync()
     {
         var userEntity = await _userRepository.GetAllUserAsync();
-
-        //List<TestDto> list = new List<TestDto>();
-        //foreach (var i in testEntity)
-        //{
-        //    list.Add(new TestDto { Id = i.Id});
-        //}
-
         return userEntity.Select(_userMapper.Map);
     }
 
     public async Task<UserDto> GetUserByIdAsync(int id)
     {
         var userEntity = await _userRepository.GetUserByIdAsync(id);
-
-        //List<TestDto> list = new List<TestDto>();
-        //foreach (var i in testEntity)
-        //{
-        //    list.Add(new TestDto { Id = i.Id});
-        //}
-
         return _userMapper.Map(userEntity);
     }
 
@@ -48,7 +36,7 @@ public class UserHandler : IUserHandler
         var existingUser = await _userRepository.GetUserByLoginAsync(request.Login);
         if (existingUser != null)
         {
-            throw new InvalidOperationException("Пользователь уже существует");
+            throw new ApplicationException("Пользователь уже существует");
         }
 
         var result = _userMapper.Map(_userRepository.AddUser(_userMapper.Map(request)));
@@ -60,13 +48,20 @@ public class UserHandler : IUserHandler
         return true;
     }
 
-    public async Task<bool> AuthUserAsync(AuthUserRequest request)
+    public async Task<SessionDto> AuthUserAsync(AuthUserRequest request)
     {
         var existingUser = await _userRepository.GetUserByLoginAsync(request.Login);
         if (existingUser == null || existingUser.Password != request.Password)
         {
-            throw new InvalidOperationException("Неверный логин или пароль");
+            throw new ApplicationException("Неверный логин или пароль");
         }
-        return true;
+
+        var userEntity = _userMapper.Map1(existingUser);
+
+        var result = _sessionRepository.AddSession(userEntity);
+
+        var result1 = _userMapper.Map(result);
+
+        return result1;
     }
 }

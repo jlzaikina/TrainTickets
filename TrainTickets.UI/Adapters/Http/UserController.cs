@@ -14,34 +14,42 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Получить список.
+    /// Получить список пользователей.
     /// </summary>
+    /// <returns><see cref="UserDto"/></returns>
     [HttpGet]
     [Route("/api/v1/user/get-all")]
-    public async Task<IEnumerable<UserDto>> GetAllUser()   //получаем всех
+    public async Task<IEnumerable<UserDto>> GetAllUser()
     {
         return await _userHandler.GetAllUserAsync();
     }
 
+
+    /// <summary>
+    /// Получить пользователя по ID.
+    /// </summary>
+    /// <param name="id">ID пользователя</param>
+    /// <returns><see cref="UserDto"/></returns>
     [HttpGet]
     [Route("/api/v1/user/get-id/{id}")]
-    public async Task<UserDto> GetUserById([FromRoute] int id)       //получаем по id
+    public async Task<UserDto> GetUserById([FromRoute] int id)
     {
         return await _userHandler.GetUserByIdAsync(id);
     }
 
+    /// <summary>
+    /// Регистрация пользователя
+    /// </summary>
+    /// <param><see cref="RegisterUserRequest"/></param>
+    /// <returns>Истинность регистрации</returns>
     [HttpPost]
     [Route("/api/v1/user/create")]
-    public async Task<ActionResult<bool>> RegisterUser([FromBody] RegisterUserRequest request)   //регистрируем
+    public async Task<ActionResult<bool>> RegisterUser([FromBody] RegisterUserRequest request)
     {
         try
         {
             var result = await _userHandler.RegisterUserAsync(request);
-            return Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
+            return Ok(result);
         }
         catch (ApplicationException ex)
         {
@@ -53,17 +61,23 @@ public class UserController : ControllerBase
         }
     }
 
+
+    /// <summary>
+    /// Авторизация пользователя
+    /// </summary>
+    /// <param><see cref="AuthUserRequest"/></param>
+    /// <returns>Истинность авторизации</returns>
     [HttpPost]
     [Route("/api/v1/user/auth")]
-
-    public async Task<ActionResult<bool>> AuthUser([FromBody] AuthUserRequest request)   //авторизируем
+    public async Task<IActionResult> AuthUser([FromBody] AuthUserRequest request)
     {
         try
         {
-            var result = await _userHandler.AuthUserAsync(request);
-            return Ok();
+            var session = await _userHandler.AuthUserAsync(request);
+
+            return Ok(new {Token = session.Guid, Username = request.Login });
         }
-        catch (InvalidOperationException ex)
+        catch (ApplicationException ex)
         {
             return Conflict(ex.Message);
         }

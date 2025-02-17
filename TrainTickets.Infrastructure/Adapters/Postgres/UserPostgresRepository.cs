@@ -6,7 +6,8 @@ using TrainTickets.UI.Ports;
 
 namespace TrainTickets.Infrastructure.Adapters.Postgres;
 
-public class UserPostgresRepository : IUserRepository
+/// <inheritdoc/>
+public class UserPostgresRepository : IUserRepository, ISessionRepository
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -60,5 +61,11 @@ public class UserPostgresRepository : IUserRepository
             }
             throw;
         }
+    }
+    public SessionEntity AddSession(SessionEntity session)
+    {
+        var addEntity = _dbContext.Sessions.Add(session).Entity;
+        _dbContext.SaveChanges();
+        return addEntity;
     }
 }

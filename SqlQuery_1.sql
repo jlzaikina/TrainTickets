@@ -12,3 +12,13 @@
 	CONSTRAINT user_unique_1 UNIQUE ("Email"),
 	CONSTRAINT user_unique_2 UNIQUE ("Phone")
 );
+
+CREATE TABLE public."Session" (
+	"Guid" varchar(36) NOT NULL,
+	"ExpirationDate" timestamp NOT NULL,
+	"UserId" int8 NULL,
+	CONSTRAINT session_pk PRIMARY KEY ("Guid")
+);
+
+
+ALTER TABLE public."Session" ADD CONSTRAINT session_user_fk FOREIGN KEY ("UserId") REFERENCES public."User"("Id");
