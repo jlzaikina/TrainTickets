@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using TrainTickets.UI.Application.Test.Handlers;
 using TrainTickets.UI.Domain.User;
 
@@ -11,30 +12,6 @@ public class UserController : ControllerBase
     public UserController(IUserHandler userHandler)
     {
         _userHandler = userHandler ?? throw new ArgumentNullException(nameof(userHandler));
-    }
-
-    /// <summary>
-    /// Получить список пользователей.
-    /// </summary>
-    /// <returns><see cref="UserDto"/></returns>
-    [HttpGet]
-    [Route("/api/v1/user/get-all")]
-    public async Task<IEnumerable<UserDto>> GetAllUser()
-    {
-        return await _userHandler.GetAllUserAsync();
-    }
-
-
-    /// <summary>
-    /// Получить пользователя по ID.
-    /// </summary>
-    /// <param name="id">ID пользователя</param>
-    /// <returns><see cref="UserDto"/></returns>
-    [HttpGet]
-    [Route("/api/v1/user/get-id/{id}")]
-    public async Task<UserDto> GetUserById([FromRoute] int id)
-    {
-        return await _userHandler.GetUserByIdAsync(id);
     }
 
     /// <summary>
@@ -69,13 +46,13 @@ public class UserController : ControllerBase
     /// <returns>Истинность авторизации</returns>
     [HttpPost]
     [Route("/api/v1/user/auth")]
-    public async Task<IActionResult> AuthUser([FromBody] AuthUserRequest request)
+    public async Task<ActionResult> AuthUser([FromBody] AuthUserRequest request)
     {
         try
         {
             var session = await _userHandler.AuthUserAsync(request);
 
-            return Ok(new {Token = session.Guid, Username = request.Login });
+            return Ok(new { Token = session.Guid, Username = request.Login });
         }
         catch (ApplicationException ex)
         {
@@ -84,6 +61,61 @@ public class UserController : ControllerBase
         catch (Exception)
         {
             return StatusCode(500, "Ошибка авторизации");
+        }
+    }
+
+    /// <summary>
+    /// Выход пользователя
+    /// </summary>
+    /// <param><see cref="LogoutRequest"/></param>
+    /// <returns>Истинность выхода</returns>
+    [HttpPost]
+    [Route("/api/v1/user/logout")]
+    public async Task<ActionResult<bool>> LogoutUser([FromBody] LogoutRequest request)
+    {
+        try
+        {
+            var result = await _userHandler.LogoutUserAsync(request);
+            return Ok(result);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Ошибка выхода");
+        }
+    }
+    /// <summary>
+    /// Получение данных для профиля по логину
+    /// </summary>
+    /// < returns >Данные пользователя</returns>
+    [HttpGet]
+    [Route("/api/v1/user/get-user/{login}")]
+    public async Task<UserDto> GetUserDataToProfile(string login)
+    {
+
+        return await _userHandler.GetUserDataToProfileAsync(login);
+    }
+
+    /// <summary>
+    /// Обновление полей профиля
+    /// </summary>
+    /// <param><see cref = "UpdateRequest" /></ param >
+    /// < returns > Истинность обновления</returns>
+    [HttpPut]
+    [Route("/api/v1/user/update/{login}")]
+    public async Task<ActionResult<bool>> UpdateProfile(string login, [FromBody] UpdateRequest request)
+    {
+        try
+        {
+            var result = await _userHandler.UpdateProfileAsync(login, request);
+            return Ok(result);
+        }
+        catch (ApplicationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Ошибка выхода");
         }
     }
 }

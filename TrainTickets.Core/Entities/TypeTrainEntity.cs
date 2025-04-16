@@ -8,14 +8,11 @@ using System.Threading.Tasks;
 
 namespace TrainTickets.UI.Entities;
 
-[Table("Session", Schema = "public")]
-public class SessionEntity
+[Table("Type_train", Schema = "public")]
+public class TypeTrainEntity
 {
     [Key]
-    public string Guid { get; set; }
-    public DateTime Expiration_Date { get; set; }
-    public long User_Id { get; set; }
-
-    //[ForeignKey("UserId")]
-    //public UserEntity User { get; set; }
+    public int Id_type_train { get; set; }
+    public string Name { get; set; }
+    public double Route { get; set; }
 }

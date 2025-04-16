@@ -1,4 +1,5 @@
 ﻿using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Crypto.Tls;
 using TrainTickets.UI.Domain.User;
 using TrainTickets.UI.Entities;
 
@@ -6,25 +7,6 @@ namespace TrainTickets.UI.Application.Test.Mappers;
 
 public class UserMapper : IUserMapper
 {
-    public UserDto Map(UserEntity entity)
-    {
-        if (entity == null)
-        {
-            throw new ArgumentNullException(nameof(entity));
-        }
-
-        return new UserDto()
-        {
-            Id = entity.Id,
-            Login = entity.Login,
-            Password = entity.Password,
-            Email = entity.Email,
-            Phone = entity.Phone,
-            Surname = entity.Surname,
-            Name = entity.Name
-        };
-    }
-
     public UserEntity Map(RegisterUserRequest request)
     {
         if (request == null)
@@ -39,35 +21,55 @@ public class UserMapper : IUserMapper
             Password = request.Password,
             Phone = request.Phone,
             Surname = request.Surname,
-            Name = request.Name
+            Name = request.Name,
+            Midname = request.Midname  
         };
     }
 
-    public SessionDto Map(SessionEntity request)
+    public SessionDto Map(SessionEntity entity)
     {
-        if (request == null)
+        if (entity == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ArgumentNullException(nameof(entity));
         }
 
         return new SessionDto()
         {
-            Guid = request.Guid,
+            Guid = entity.Guid,
         };
     }
 
-    public SessionEntity Map1(UserEntity request)
+    public SessionEntity Map1(UserEntity entity)
     {
-        if (request == null)
+        if (entity == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ArgumentNullException(nameof(entity));
         }
 
         return new SessionEntity()
         {
             Guid = Guid.NewGuid().ToString(),
-            UserId = request.Id,
-            ExpirationDate = DateTime.UtcNow.AddDays(7)
+            User_Id = entity.Id,
+            Expiration_Date = DateTime.UtcNow.AddDays(7)
+        };
+    }
+
+    public UserDto Map(UserEntity entity, PassengerEntity entity1)
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+
+        return new UserDto()
+        {
+            Name = entity.Name,
+            Surname = entity.Surname,
+            Midname= entity.Midname,
+            Email = entity.Email,
+            Phone = entity.Phone,
+            Passport = entity1?.Passport,
+            Date_birth = entity1?.Date_birth
         };
     }
 }

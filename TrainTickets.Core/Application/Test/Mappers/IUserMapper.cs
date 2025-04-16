@@ -5,12 +5,11 @@ namespace TrainTickets.UI.Application.Test.Mappers;
 
 public interface IUserMapper
 {
-    UserDto Map(UserEntity entity);
-
+    UserDto Map(UserEntity entity, PassengerEntity entity1);
     UserEntity Map(RegisterUserRequest request);
 
-    SessionEntity Map1(UserEntity request);
+    SessionEntity Map1(UserEntity entity);
 
-    SessionDto Map(SessionEntity request);
+    SessionDto Map(SessionEntity entity);
 
 }

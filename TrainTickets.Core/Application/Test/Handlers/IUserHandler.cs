@@ -8,19 +8,6 @@ namespace TrainTickets.UI.Application.Test.Handlers;
 public interface IUserHandler
 {
     /// <summary>
-    /// Получить всех пользователей.
-    /// </summary>
-    /// <returns><see cref="UserDto"/></returns>
-    Task<IEnumerable<UserDto>> GetAllUserAsync();
-
-    /// <summary>
-    /// Получить пользователя по ID.
-    /// </summary>
-    /// <param name="id">ID пользователя</param>
-    /// <returns><see cref="UserDto"/></returns>
-    Task<UserDto> GetUserByIdAsync(int id);
-
-    /// <summary>
     /// Регистрация
     /// </summary>
     /// <param name="request">Запрос на регистрацию</param>
@@ -33,4 +20,15 @@ public interface IUserHandler
     /// <param name="request">Запрос на авторизацию</param>
     /// <returns>Истинность авторизации</returns>
     Task<SessionDto> AuthUserAsync(AuthUserRequest request);
+
+    /// <summary>
+    /// Выход
+    /// </summary>
+    /// <param name="request">Запрос на выход</param>
+    /// <returns>Истинность выхода</returns>
+    Task<bool> LogoutUserAsync(LogoutRequest request);
+
+    Task<bool> UpdateProfileAsync(string login, UpdateRequest request);
+
+    Task<UserDto> GetUserDataToProfileAsync(string login);
 }

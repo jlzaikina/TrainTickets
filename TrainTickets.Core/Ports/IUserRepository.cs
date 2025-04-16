@@ -35,4 +35,27 @@ public interface IUserRepository
     /// <returns><see cref="UserEntity"/></returns>
     Task<UserEntity> GetUserByLoginAsync(string login);
 
+    /// <summary>
+    /// Добавить сессию пользователя
+    /// </summary>
+    /// <param name="entity">Сессия</param>
+    /// <returns><see cref="SessionEntity"/></returns>
+    SessionEntity AddSession(SessionEntity entity);
+
+    /// <summary>
+    /// Получить сессию по ID пользователя
+    /// </summary>
+    /// <param name="id">Id пользователя</param>
+    /// <returns><see cref="SessionEntity"/></returns>
+    Task<SessionEntity> GetSessionByUserIdAsync(long id);
+
+    /// <summary>
+    /// ПУдалить сессию
+    /// </summary>
+    /// <param name="guid">Guid</param>
+    Task DeleteSession(string guid);
+    Task UpdateUser(UserEntity user);
+
+    Task<PassengerEntity> GetPassengerByUserIdAsync(long id);
+    Task UpdatePassenger(PassengerEntity entity);
 }
