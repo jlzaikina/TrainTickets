@@ -20,6 +20,7 @@ public class Startup
             Configuration = configuration;
         }
 
+
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
@@ -37,18 +38,37 @@ public class Startup
             //Регистрация сервисов
              services.AddTransient<IUserHandler, UserHandler>();
              services.AddTransient<IUserMapper, UserMapper>();
-             services.AddTransient<IUserRepository, UserPostgresRepository>();
+             services.AddTransient<IPassMapper, PassMapper>();
+        services.AddTransient<ITicketMapper, TicketMapper>();
+        services.AddTransient<ITrainMapper, TrainMapper>();
+        services.AddTransient<IPassengerHandler, PassHandler>();
+             services.AddTransient<ITicketHandler, TicketHandler>();
+        services.AddTransient<ITrainHandler, TrainHandler>();
+        services.AddTransient<IUserRepository, UserPostgresRepository>();
+             services.AddTransient<IPassRepository, PassPostgresRepository>();
+             services.AddTransient<ITicketRepository, TicketPostgresRepository>();
+        services.AddTransient<ITrainRepository, TrainPostgresRepository>();
 
-            // services.AddTransient<IGeoClient>(x => new Client(geoServiceGrpcHost));
-            
-            //Commands, Queries
-            // services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
-            // services.AddMediatR(cfg => {
-            //     cfg.RegisterServicesFromAssembly(typeof(DeliveryFood.Core.Application.UseCases.Queries.GetOrders.Handler).Assembly); 
-            // });
+        services.AddTransient<IScheduleHandler, ScheduleHandler>();
+            services.AddTransient<IScheduleMapper, ScheduleMapper>();
+            services.AddTransient<IScheduleRepository, SchedulePostgresRepository>();
+            services.AddTransient<IPassRepository, PassPostgresRepository>();
 
-            // //HTTP Handlers
-            services.AddControllers();
+        // services.AddTransient<IGeoClient>(x => new Client(geoServiceGrpcHost));
+
+        //Commands, Queries
+        // services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
+        // services.AddMediatR(cfg => {
+        //     cfg.RegisterServicesFromAssembly(typeof(DeliveryFood.Core.Application.UseCases.Queries.GetOrders.Handler).Assembly); 
+        // });
+
+        // //HTTP Handlers
+
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+
+
+        services.AddControllers();
            
             //Swagger
              services.AddSwaggerGen(c =>
@@ -62,34 +82,45 @@ public class Startup
              services.AddControllers();
              services.AddEndpointsApiExplorer();
              services.AddHealthChecks();
-             
             
-            // CRON Jobs
-            // services.AddQuartz(configure =>
-            // {
-            //     var acceptOrdersJobKey = new JobKey(nameof(AcceptOrdersJob));
-            //     var deliveryOrderJobKey = new JobKey(nameof(DeliveryOrderJob));
-            //     configure
-            //         .AddJob<AcceptOrdersJob>(acceptOrdersJobKey)
-            //         .AddTrigger(
-            //             trigger => trigger.ForJob(acceptOrdersJobKey)
-            //                 .WithSimpleSchedule(
-            //                     schedule => schedule.WithIntervalInSeconds(30)
-            //                         .RepeatForever()))
-            //         .AddJob<DeliveryOrderJob>(deliveryOrderJobKey)
-            //         .AddTrigger(
-            //             trigger => trigger.ForJob(deliveryOrderJobKey)
-            //                 .WithSimpleSchedule(
-            //                     schedule => schedule.WithIntervalInSeconds(30)
-            //                         .RepeatForever()));
-            //     configure.UseMicrosoftDependencyInjectionJobFactory();
-            // });
-            // services.AddQuartzHostedService();
-            
-        }
+             services.AddCors(options =>
+             {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin() // Разрешить запросы с любого источника
+                        .AllowAnyMethod() // Разрешить все HTTP-методы (GET, POST и т.д.)
+                        .AllowAnyHeader(); // Разрешить все заголовки
+                });
+             });
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+
+        // CRON Jobs
+        // services.AddQuartz(configure =>
+        // {
+        //     var acceptOrdersJobKey = new JobKey(nameof(AcceptOrdersJob));
+        //     var deliveryOrderJobKey = new JobKey(nameof(DeliveryOrderJob));
+        //     configure
+        //         .AddJob<AcceptOrdersJob>(acceptOrdersJobKey)
+        //         .AddTrigger(
+        //             trigger => trigger.ForJob(acceptOrdersJobKey)
+        //                 .WithSimpleSchedule(
+        //                     schedule => schedule.WithIntervalInSeconds(30)
+        //                         .RepeatForever()))
+        //         .AddJob<DeliveryOrderJob>(deliveryOrderJobKey)
+        //         .AddTrigger(
+        //             trigger => trigger.ForJob(deliveryOrderJobKey)
+        //                 .WithSimpleSchedule(
+        //                     schedule => schedule.WithIntervalInSeconds(30)
+        //                         .RepeatForever()));
+        //     configure.UseMicrosoftDependencyInjectionJobFactory();
+        // });
+        // services.AddQuartzHostedService();
+
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("AllowAll");
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {

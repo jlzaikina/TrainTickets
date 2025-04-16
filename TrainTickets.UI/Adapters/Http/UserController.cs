@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using TrainTickets.UI.Application.Test.Handlers;
 using TrainTickets.UI.Domain.User;
 
@@ -14,34 +15,18 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Получить список.
+    /// Регистрация пользователя
     /// </summary>
-    [HttpGet]
-    [Route("/api/v1/user/get-all")]
-    public async Task<IEnumerable<UserDto>> GetAllUser()   //получаем всех
-    {
-        return await _userHandler.GetAllUserAsync();
-    }
-
-    [HttpGet]
-    [Route("/api/v1/user/get-id/{id}")]
-    public async Task<UserDto> GetUserById([FromRoute] int id)       //получаем по id
-    {
-        return await _userHandler.GetUserByIdAsync(id);
-    }
-
+    /// <param><see cref="RegisterUserRequest"/></param>
+    /// <returns>Истинность регистрации</returns>
     [HttpPost]
     [Route("/api/v1/user/create")]
-    public async Task<ActionResult<bool>> RegisterUser([FromBody] RegisterUserRequest request)   //регистрируем
+    public async Task<ActionResult<bool>> RegisterUser([FromBody] RegisterUserRequest request)
     {
         try
         {
             var result = await _userHandler.RegisterUserAsync(request);
-            return Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
+            return Ok(result);
         }
         catch (ApplicationException ex)
         {
@@ -53,23 +38,84 @@ public class UserController : ControllerBase
         }
     }
 
+
+    /// <summary>
+    /// Авторизация пользователя
+    /// </summary>
+    /// <param><see cref="AuthUserRequest"/></param>
+    /// <returns>Истинность авторизации</returns>
     [HttpPost]
     [Route("/api/v1/user/auth")]
-
-    public async Task<ActionResult<bool>> AuthUser([FromBody] AuthUserRequest request)   //авторизируем
+    public async Task<ActionResult> AuthUser([FromBody] AuthUserRequest request)
     {
         try
         {
-            var result = await _userHandler.AuthUserAsync(request);
-            return Ok();
+            var session = await _userHandler.AuthUserAsync(request);
+
+            return Ok(new { Token = session.Guid, Username = request.Login });
         }
-        catch (InvalidOperationException ex)
+        catch (ApplicationException ex)
         {
             return Conflict(ex.Message);
         }
         catch (Exception)
         {
             return StatusCode(500, "Ошибка авторизации");
+        }
+    }
+
+    /// <summary>
+    /// Выход пользователя
+    /// </summary>
+    /// <param><see cref="LogoutRequest"/></param>
+    /// <returns>Истинность выхода</returns>
+    [HttpPost]
+    [Route("/api/v1/user/logout")]
+    public async Task<ActionResult<bool>> LogoutUser([FromBody] LogoutRequest request)
+    {
+        try
+        {
+            var result = await _userHandler.LogoutUserAsync(request);
+            return Ok(result);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Ошибка выхода");
+        }
+    }
+    /// <summary>
+    /// Получение данных для профиля по логину
+    /// </summary>
+    /// < returns >Данные пользователя</returns>
+    [HttpGet]
+    [Route("/api/v1/user/get-user/{login}")]
+    public async Task<UserDto> GetUserDataToProfile(string login)
+    {
+
+        return await _userHandler.GetUserDataToProfileAsync(login);
+    }
+
+    /// <summary>
+    /// Обновление полей профиля
+    /// </summary>
+    /// <param><see cref = "UpdateRequest" /></ param >
+    /// < returns > Истинность обновления</returns>
+    [HttpPut]
+    [Route("/api/v1/user/update/{login}")]
+    public async Task<ActionResult<bool>> UpdateProfile(string login, [FromBody] UpdateRequest request)
+    {
+        try
+        {
+            var result = await _userHandler.UpdateProfileAsync(login, request);
+            return Ok(result);
+        }
+        catch (ApplicationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Ошибка выхода");
         }
     }
 }
