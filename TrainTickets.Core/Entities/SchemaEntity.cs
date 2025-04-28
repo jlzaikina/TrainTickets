@@ -13,5 +13,6 @@ public class SchemaEntity
     [Key]
     public int Id_schema { get; set; }
 
+    [Column(TypeName = "jsonb")]
     public string Schema { get; set; }
 }
