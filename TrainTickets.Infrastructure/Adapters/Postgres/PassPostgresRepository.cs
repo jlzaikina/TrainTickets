@@ -85,4 +85,11 @@ public class PassPostgresRepository: IPassRepository
 
         return !await query.AnyAsync();
     }
+
+    public async Task<IEnumerable<PassengerEntity>> GetAllPassengerAsync(long id)
+    {
+        return await _dbContext.Passengers
+                .Where(p => p.Id_user == id) // Фильтруем по UserId
+                .ToListAsync();
+    }
 }

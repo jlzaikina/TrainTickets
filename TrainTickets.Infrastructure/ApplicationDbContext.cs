@@ -17,6 +17,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<TrainEntity> Trains { get; set; } = null!;
 
     public DbSet<VanEntity> Vans { get; set; } = null!;
+
+    public DbSet<SeatEntity> Seats { get; set; } = null!;
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
 

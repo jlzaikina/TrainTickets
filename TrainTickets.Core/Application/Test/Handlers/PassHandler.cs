@@ -86,4 +86,11 @@ public class PassHandler: IPassengerHandler
         var passEntity = await _passRepository.GetPassengerAsync(userEntity.Id, userEntity.Email);
         return passEntity.Select(_passMapper.Map);
     }
+
+    public async Task<IEnumerable<PassengerDto>> GetPassengerDataForBookAsync(string login)
+    {
+        var userEntity = await _userRepository.GetUserByLoginAsync(login);
+        var passEntity = await _passRepository.GetAllPassengerAsync(userEntity.Id);
+        return passEntity.Select(_passMapper.Map);
+    }
 }

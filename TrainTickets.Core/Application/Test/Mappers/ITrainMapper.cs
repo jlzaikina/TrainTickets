@@ -12,4 +12,6 @@ namespace TrainTickets.UI.Application.Test.Mappers;
 public interface ITrainMapper
 {
     TrainDto Map(ScheduleEntity entity);
+
+    VanDto Map(VanEntity entity, List<int> seats);
 }

@@ -4,6 +4,7 @@ namespace TrainTickets.UI.Adapters.Http;
 
 using Org.BouncyCastle.Asn1.Ocsp;
 using TrainTickets.UI.Domain.Ticket;
+using TrainTickets.UI.Domain.Train;
 
 public class TicketController : ControllerBase
 {
@@ -15,7 +16,7 @@ public class TicketController : ControllerBase
     }
 
     /// <summary>
-    /// Получить расписание
+    /// Получить брони
     /// </summary>
     /// <returns><see cref="BookDto"/></returns>
     [HttpGet]
@@ -46,6 +47,21 @@ public class TicketController : ControllerBase
         catch (Exception)
         {
             return StatusCode(500, "Ошибка удаления");
+        }
+    }
+
+    [HttpPost]
+    [Route("/api/v1/ticket/send-ticket/{id}/{login}")]
+    public async Task<ActionResult<bool>> SendTicket(int id, string login)
+    {
+        try
+        {
+            var result = await _ticketHandler.SendTicketAsync(id, login);
+            return Ok(result);
+        }
+        catch (ApplicationException ex)
+        {
+            return Conflict(ex.Message);
         }
     }
 }

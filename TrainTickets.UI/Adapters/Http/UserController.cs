@@ -115,7 +115,7 @@ public class UserController : ControllerBase
         }
         catch (Exception)
         {
-            return StatusCode(500, "Ошибка выхода");
+            return StatusCode(500, "Ошибка обновления");
         }
     }
 }

@@ -65,8 +65,6 @@ public class TicketMapper: ITicketMapper
                 Arrival_city_name = entity.Book.Schedule.Route.ArrivalCity.Name,
                 Departure_city_name = entity.Book.Schedule.Route.DepartureCity.Name,
                 Seat_name = entity.Seat.Type_seat.Name,
-
-                PdfUrl = $"/api/tickets/{entity.Id_ticket}/pdf"
         };
     }
 }

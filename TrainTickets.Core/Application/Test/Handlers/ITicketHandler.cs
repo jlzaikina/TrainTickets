@@ -16,4 +16,6 @@ public interface ITicketHandler
     Task<TicketDto> GetTicketByIdAsync(int id);
     byte[] GenerateTicketPdf(TicketDto ticket);
     Task<bool> DeleteTicketAsync(int id, string login);
+
+    Task<bool> SendTicketAsync(int id, string login);
 }

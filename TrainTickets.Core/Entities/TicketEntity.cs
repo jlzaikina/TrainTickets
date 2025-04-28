@@ -13,7 +13,7 @@ public class TicketEntity
 {
     [Key]
     public int Id_ticket { get; set; }
-    public int Price { get; set; }
+    public double Price { get; set; }
     public int Id_seat { get; set; }
     public int Id_book { get; set; }
     public long Id_passenger { get; set; }

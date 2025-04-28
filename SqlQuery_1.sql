@@ -1,7 +1,27 @@
-﻿CREATE SCHEMA public AUTHORIZATION pg_database_owner;
+﻿-- DROP SCHEMA public;
+
+CREATE SCHEMA public AUTHORIZATION pg_database_owner;
 
 COMMENT ON SCHEMA public IS 'standard public schema';
 
+-- DROP SEQUENCE public."Book_id_book_seq";
+
+CREATE SEQUENCE public."Book_id_book_seq"
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
+-- DROP SEQUENCE public."Ticket_id_ticket_seq";
+
+CREATE SEQUENCE public."Ticket_id_ticket_seq"
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
 -- DROP SEQUENCE public."User_id_seq";
 
 CREATE SEQUENCE public."User_id_seq"
@@ -153,6 +173,19 @@ CREATE TABLE public."User" (
 );
 
 
+-- public."Schema" определение
+
+-- Drop table
+
+-- DROP TABLE public."Schema";
+
+CREATE TABLE public."Schema" (
+	"Id_schema" int4 DEFAULT nextval('"Schema_id_shema_seq"'::regclass) NOT NULL,
+	"Schema" json NOT NULL,
+	CONSTRAINT schema_pk PRIMARY KEY ("Id_schema")
+);
+
+
 -- public."Passenger" определение
 
 -- Drop table
@@ -234,7 +267,9 @@ CREATE TABLE public."Van" (
 	"Number_van" int4 NOT NULL,
 	"Number_train" int4 NOT NULL,
 	"Id_type_van" int4 NOT NULL,
+	"Id_schema" int4 NOT NULL,
 	CONSTRAINT van_pk PRIMARY KEY ("Id_van"),
+	CONSTRAINT van_schema_fk FOREIGN KEY ("Id_schema") REFERENCES public."Schema"("Id_schema"),
 	CONSTRAINT van_train_fk FOREIGN KEY ("Number_train") REFERENCES public."Train"("Number_train"),
 	CONSTRAINT van_type_van_fk FOREIGN KEY ("Id_type_van") REFERENCES public."Type_van"("Id_type_van")
 );
@@ -282,10 +317,10 @@ CREATE TABLE public."Seat" (
 -- DROP TABLE public."Book";
 
 CREATE TABLE public."Book" (
-	"Id_book" int4 NOT NULL,
 	"Date_create" date NOT NULL,
 	"Id_schedule" int4 NOT NULL,
 	"Id_user" int8 NOT NULL,
+	"Id_book" int4 DEFAULT nextval('"Book_id_book_seq"'::regclass) NOT NULL,
 	CONSTRAINT book_pk PRIMARY KEY ("Id_book"),
 	CONSTRAINT book_schedule_fk FOREIGN KEY ("Id_schedule") REFERENCES public."Schedule"("Id_schedule"),
 	CONSTRAINT book_user_fk FOREIGN KEY ("Id_user") REFERENCES public."User"("Id")
@@ -299,11 +334,11 @@ CREATE TABLE public."Book" (
 -- DROP TABLE public."Ticket";
 
 CREATE TABLE public."Ticket" (
-	"Id_ticket" int4 NOT NULL,
 	"Price" int4 NOT NULL,
 	"Id_seat" int4 NOT NULL,
 	"Id_book" int4 NOT NULL,
 	"Id_passenger" int8 NOT NULL,
+	"Id_ticket" int4 DEFAULT nextval('"Ticket_id_ticket_seq"'::regclass) NOT NULL,
 	CONSTRAINT ticket_pk PRIMARY KEY ("Id_ticket"),
 	CONSTRAINT ticket_book_fk FOREIGN KEY ("Id_book") REFERENCES public."Book"("Id_book"),
 	CONSTRAINT ticket_passenger_fk FOREIGN KEY ("Id_passenger") REFERENCES public."Passenger"("Id_passenger"),

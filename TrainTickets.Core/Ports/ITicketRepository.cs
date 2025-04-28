@@ -13,4 +13,6 @@ public interface ITicketRepository
     Task<TicketEntity> GetTicketByIdAsync(int id);
 
     Task DeleteTicket(int id, string login);
+
+    Task AddTicket(TicketEntity entity);
 }

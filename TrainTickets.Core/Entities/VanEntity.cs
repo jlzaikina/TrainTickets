@@ -16,10 +16,16 @@ public class VanEntity
     public int Number_van { get; set; }
     public int Number_train { get; set; }
     public int Id_type_van { get; set; }
+    public int Id_schema { get; set; }
+
+    public List<SeatEntity> Seats { get; set; } = new();
 
     [ForeignKey("Number_train")]
     public TrainEntity Train { get; set; }
 
     [ForeignKey("Id_type_van")]
     public TypeVanEntity Type_van { get; set; }
+
+    [ForeignKey("Id_schema")]
+    public SchemaEntity Schema { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,20 @@ public class TicketPostgresRepository: ITicketRepository
     public TicketPostgresRepository(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    public async Task AddTicket(TicketEntity entity)
+    {
+        try
+        {
+            _dbContext.Tickets.Add(entity);
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
+        {
+
+            throw;
+        }
     }
 
     public async Task DeleteTicket(int id, string login)
