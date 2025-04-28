@@ -295,7 +295,7 @@ public class TrainHandler : ITrainHandler
     {
         var root = json.RootElement;
 
-        if (typeVan == "Купе" || typeVan == "Плацкарт")
+        if (typeVan == "Купе" || typeVan == "Плацкарт" || typeVan == "СВ")
         {
             if (json.RootElement.TryGetProperty("compartments", out var compartments))
             {
@@ -305,7 +305,7 @@ public class TrainHandler : ITrainHandler
                     for (int i = 0; i < seats.Count; i++)
                     {
                         var seatNum = seats[i].GetInt32();
-                        var seatType = seats.Count == 2 ? "сидячее" : (i % 2 == 0 ? "нижнее" : "верхнее");
+                        var seatType = seats.Count == 2 ? "нижнее" : (i % 2 == 0 ? "нижнее" : "верхнее");
                         vanEntity.Seats.Add(new SeatEntity
                         {
                             Number_seat = seatNum,

@@ -77,4 +77,18 @@ public class PassengerController: ControllerBase
     {
         return await _passHandler.GetPassengerDataForBookAsync(login);
     }
+
+    /// <summary>
+    /// Удаление пассажира
+    /// </summary>
+    /// <param><see cref="DeletePassRequest"/></param>
+    /// <returns>Истинность удаления</returns>
+    [HttpGet]
+    [Route("/api/v1/pass/is-self/{login}/{passengerId}")]
+    public async Task<ActionResult<bool>> IsSelfPassenger(string login, long passengerId)
+    {
+        
+            var result = await _passHandler.IsSelfPassengerAsync(login, passengerId);
+            return Ok(result);        
+    }
 }
