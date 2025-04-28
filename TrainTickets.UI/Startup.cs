@@ -6,6 +6,7 @@ using TrainTickets.Infrastructure.Adapters.Postgres;
 using TrainTickets.UI.Application.Test.Handlers;
 using TrainTickets.UI.Application.Test.Mappers;
 using TrainTickets.UI.Ports;
+using TrainTickets.Core.Settings;
 
 namespace TrainTickets.UI;
 
@@ -15,6 +16,8 @@ public class Startup
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
                 .AddEnvironmentVariables();
             var configuration = builder.Build();
             Configuration = configuration;
@@ -25,8 +28,9 @@ public class Startup
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Configuration
-             services.Configure<Settings>(options => Configuration.Bind(options));
+
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+                // Configuration
              var connectionString = Configuration["CONNECTION_STRING"];
             
             services.AddDbContext<ApplicationDbContext>((sp,optionsBuilder) =>
@@ -35,8 +39,8 @@ public class Startup
                 }
             );
 
-            //Регистрация сервисов
-             services.AddTransient<IUserHandler, UserHandler>();
+        //Регистрация сервисов
+        services.AddTransient<IUserHandler, UserHandler>();
              services.AddTransient<IUserMapper, UserMapper>();
              services.AddTransient<IPassMapper, PassMapper>();
         services.AddTransient<ITicketMapper, TicketMapper>();
@@ -53,16 +57,6 @@ public class Startup
             services.AddTransient<IScheduleMapper, ScheduleMapper>();
             services.AddTransient<IScheduleRepository, SchedulePostgresRepository>();
             services.AddTransient<IPassRepository, PassPostgresRepository>();
-
-        // services.AddTransient<IGeoClient>(x => new Client(geoServiceGrpcHost));
-
-        //Commands, Queries
-        // services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
-        // services.AddMediatR(cfg => {
-        //     cfg.RegisterServicesFromAssembly(typeof(DeliveryFood.Core.Application.UseCases.Queries.GetOrders.Handler).Assembly); 
-        // });
-
-        // //HTTP Handlers
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -92,29 +86,6 @@ public class Startup
                         .AllowAnyHeader(); // Разрешить все заголовки
                 });
              });
-
-
-        // CRON Jobs
-        // services.AddQuartz(configure =>
-        // {
-        //     var acceptOrdersJobKey = new JobKey(nameof(AcceptOrdersJob));
-        //     var deliveryOrderJobKey = new JobKey(nameof(DeliveryOrderJob));
-        //     configure
-        //         .AddJob<AcceptOrdersJob>(acceptOrdersJobKey)
-        //         .AddTrigger(
-        //             trigger => trigger.ForJob(acceptOrdersJobKey)
-        //                 .WithSimpleSchedule(
-        //                     schedule => schedule.WithIntervalInSeconds(30)
-        //                         .RepeatForever()))
-        //         .AddJob<DeliveryOrderJob>(deliveryOrderJobKey)
-        //         .AddTrigger(
-        //             trigger => trigger.ForJob(deliveryOrderJobKey)
-        //                 .WithSimpleSchedule(
-        //                     schedule => schedule.WithIntervalInSeconds(30)
-        //                         .RepeatForever()));
-        //     configure.UseMicrosoftDependencyInjectionJobFactory();
-        // });
-        // services.AddQuartzHostedService();
 
     }
 

@@ -3,24 +3,29 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-
+using System.Net;
+using System.Net.Mail;
 using TrainTickets.UI.Application.Test.Mappers;
 using TrainTickets.UI.Domain.Schedules;
 using TrainTickets.UI.Domain.Ticket;
 using TrainTickets.UI.Entities;
 using TrainTickets.UI.Ports;
+using TrainTickets.Core.Settings;
+using Microsoft.Extensions.Options;
 
 namespace TrainTickets.UI.Application.Test.Handlers;
 
 public class TicketHandler: ITicketHandler
 {
+    private readonly EmailSettings _settings;
     private readonly ITicketRepository _ticketRepository;
     private readonly IUserRepository _userRepository;
     private readonly ITicketMapper _ticketMapper;
 
-    public TicketHandler(ITicketRepository ticketRepository, ITicketMapper ticketMapper, IUserRepository userRepository)
+    public TicketHandler(ITicketRepository ticketRepository, ITicketMapper ticketMapper, IUserRepository userRepository, IOptions<EmailSettings> options)
     {
         _ticketRepository = ticketRepository ?? throw new ArgumentNullException(nameof(ticketRepository));
+        _settings = options.Value;
         _ticketMapper = ticketMapper ?? throw new ArgumentNullException(nameof(ticketMapper));
         _userRepository = userRepository ?? throw new ArgumentNullException( nameof(userRepository));
     }
@@ -117,5 +122,56 @@ public class TicketHandler: ITicketHandler
     {
         var ticket = await _ticketRepository.GetTicketByIdAsync(id);
         return _ticketMapper.Map(ticket);   
+    }
+
+    public async Task<bool> SendTicketAsync(int id, string login)
+    {
+        var ticket = await _ticketRepository.GetTicketByIdAsync(id);
+        var ticketDto = _ticketMapper.Map(ticket);
+        var pdfBytes = GenerateTicketPdf(ticketDto);
+        var user = await _userRepository.GetUserByLoginAsync(login);
+        await SendTicketAsync(
+                user.Email,
+                pdfBytes,
+                ticketDto.Passenger_name);
+
+        return true;
+    }
+    private async Task SendTicketAsync(string toEmail, byte[] ticketPdf, string name)
+    {
+        try
+        {
+            using var smtpClient = new SmtpClient(_settings.SmtpServer)
+            {
+                Port = _settings.Port,
+                EnableSsl = _settings.EnableSsl,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 30000,
+                UseDefaultCredentials = false
+            };
+
+            smtpClient.Credentials = new NetworkCredential(_settings.Username, _settings.Password);
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_settings.FromEmail, _settings.FromName),
+                Subject = "Ваш билет на поезд",
+                IsBodyHtml = true,
+                Priority = MailPriority.Normal
+            };
+
+            mailMessage.To.Add(toEmail);
+
+            // Добавляем PDF вложение
+            using var stream = new MemoryStream(ticketPdf);
+            var attachment = new Attachment(stream, $"{name.Split(' ')[0]}.pdf", "application/pdf");
+            mailMessage.Attachments.Add(attachment);
+
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Не удалось отправить билет", ex);
+        }
     }
 }

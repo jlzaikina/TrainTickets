@@ -33,4 +33,13 @@ public class TrainMapper : ITrainMapper
                     g => g.Select(c => c.Number_van).OrderBy(n => n).ToList())
         };
     }
+
+    public VanDto Map(VanEntity entity, List<int> seats)
+    {
+        return new VanDto()
+        {
+            CarriageSchemaJson = entity.Schema.Schema,
+            OccupiedSeatNumbers = seats
+        };
+    }
 }

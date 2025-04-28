@@ -67,4 +67,14 @@ public class PassengerController: ControllerBase
     {
         return await _passHandler.GetPassengerDataAsync(login);
     }
+    /// <summary>
+    /// Получение пассажиров пользователя
+    /// </summary>
+    /// < returns >Данные пассажира</returns>
+    [HttpGet]
+    [Route("/api/v1/pass/get-pass-book/{login}")]
+    public async Task<IEnumerable<PassengerDto>> GetPassengerDataForBook(string login)
+    {
+        return await _passHandler.GetPassengerDataForBookAsync(login);
+    }
 }

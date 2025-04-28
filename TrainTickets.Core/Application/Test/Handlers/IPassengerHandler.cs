@@ -16,4 +16,5 @@ public interface IPassengerHandler
     Task<bool> DeletePassengerAsync(string login, DeletePassRequest request);
 
     Task<IEnumerable<PassengerDto>> GetPassengerDataAsync(string login);
+    Task<IEnumerable<PassengerDto>> GetPassengerDataForBookAsync(string login);
 }
