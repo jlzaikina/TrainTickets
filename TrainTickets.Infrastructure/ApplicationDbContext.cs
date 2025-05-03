@@ -19,6 +19,15 @@ public class ApplicationDbContext : DbContext
     public DbSet<VanEntity> Vans { get; set; } = null!;
 
     public DbSet<SeatEntity> Seats { get; set; } = null!;
+
+    public DbSet<CityEntity> Cities { get; set; } = null!;
+
+    public DbSet<RouteEntity> Routes { get; set; } = null!;
+
+    public DbSet<SchemaEntity> Schemas { get; set; } = null!;
+    public DbSet<TypeTrainEntity> TypeTrains { get; set; } = null!;
+    public DbSet<TypeVanEntity> TypeVans { get; set; } = null!;
+    public DbSet<TypeSeatEntity> TypeSeats { get; set; } = null!;
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
 

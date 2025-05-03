@@ -24,4 +24,5 @@ public class BookEntity
 
     [ForeignKey("Id_user")]
     public UserEntity User { get; set; }
+
 }

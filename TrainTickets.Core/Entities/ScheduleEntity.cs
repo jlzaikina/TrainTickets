@@ -23,4 +23,6 @@ public class ScheduleEntity
 
     [ForeignKey("Number_train")]
     public TrainEntity Train { get; set; }
+
+    public ICollection<BookEntity> Bookings { get; set; }
 }

@@ -79,7 +79,7 @@ public class TicketPostgresRepository: ITicketRepository
             .Include(b => b.Schedule)
                 .ThenInclude(b => b.Route)
                     .ThenInclude(r => r.DepartureCity)
-            .Where(b => b.Id_user == id)
+            .Where(b => b.Id_user == id && b.Schedule.Date_departure >= DateTime.Now.Date)
             .AsNoTracking()
             .ToListAsync();
     }

@@ -14,4 +14,8 @@ public interface ITrainMapper
     TrainDto Map(ScheduleEntity entity);
 
     VanDto Map(VanEntity entity, List<int> seats);
+
+    SchemaDto Map(SchemaEntity entity);
+
+    TrainDetailsDto Map(TrainEntity entity);
 }

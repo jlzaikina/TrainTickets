@@ -25,4 +25,34 @@ public interface ITrainRepository
     Task<BookEntity?> GetActiveBookingForScheduleAsync(long id, int idSchedule);
 
     Task AddBook(BookEntity entity);
+
+    Task<IEnumerable<int>> GetVanNumberAsync();
+
+    Task<IEnumerable<SchemaEntity>> GetAllSchemaAsync();
+    Task<IEnumerable<string>> GetSchemaNameAsync();
+    Task<string> GetSchemaNameByIdAsync(int id);
+    Task AddSchema(SchemaEntity entity);
+
+    Task<SchemaEntity> GetSchemaByIdAsync(int id);
+
+    Task<TrainEntity> GetTrainByNumberAsync(int number);
+    Task DeleteTrain(TrainEntity entity);
+
+    Task UpdateSchema(SchemaEntity entity);
+
+    Task DeleteSchema(SchemaEntity entity);
+
+    Task<int> GetTypeTrainIdAsync(string type);
+    Task<int> GetTypeVanIdAsync(string type);
+    Task<int> GetTypeSeatIdAsync(string type);
+
+    Task AddTrain(TrainEntity entity);
+
+    Task<IEnumerable<TrainEntity>> GetAllTrainsAsync();
+
+    Task DeleteVans(IEnumerable<VanEntity> entity);
+
+    Task UpdateTrain(TrainEntity entity);
+
+    Task<IEnumerable<string>> GetTypeTrainsAsync();
 }

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Org.BouncyCastle.Asn1.Ocsp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TrainTickets.UI.Application.Test.Mappers;
 using TrainTickets.UI.Domain.Ticket;
@@ -12,7 +14,7 @@ using TrainTickets.UI.Ports;
 
 namespace TrainTickets.UI.Application.Test.Handlers;
 
-public class TrainHandler: ITrainHandler
+public class TrainHandler : ITrainHandler
 {
     private readonly ITrainRepository _trainRepository;
     private readonly ITicketRepository _ticketRepository;
@@ -87,7 +89,7 @@ public class TrainHandler: ITrainHandler
         {
             Date_create = DateTime.UtcNow,
             Id_schedule = scheduleId,
-            Id_user= userId,
+            Id_user = userId,
         };
 
         await _trainRepository.AddBook(booking);
@@ -155,7 +157,7 @@ public class TrainHandler: ITrainHandler
     public async Task<double> GetPriceAsync(CheckRequest request)
     {
         InfoTrainRequest request1 = new InfoTrainRequest();
-        request1.Number_train = request.Number_train;   
+        request1.Number_train = request.Number_train;
         request1.DateDeparture = request.DateDeparture;
         double price = 2.5;
         var train = await _trainRepository.GetInfoTrainInScheduleAsync(request1);
@@ -175,5 +177,217 @@ public class TrainHandler: ITrainHandler
         var shema = await _trainRepository.GetShemaVanAsync(request);
         var seats = await _trainRepository.GetOccupiedSeatAsync(shema.Id_van);
         return _trainMapper.Map(shema, seats);
+    }
+
+    public async Task<IEnumerable<int>> GetVanNumberAsync()
+    {
+        return await _trainRepository.GetVanNumberAsync();
+    }
+
+    public async Task<IEnumerable<SchemaDto>> GetAllSchemaAsync()
+    {
+        var shema = await _trainRepository.GetAllSchemaAsync();
+        return shema.Select(_trainMapper.Map);
+    }
+    public async Task<SchemaDto> GetSchemaAsync(int id)
+    {
+        var shema = await _trainRepository.GetSchemaByIdAsync(id);
+        return _trainMapper.Map(shema);
+    }
+    public async Task<bool> SaveSchemaAsync(SaveSchemaRequest request)
+    {
+        string newSchemaName;
+
+        request.JsonSchema.TryGetProperty("schemaName", out var name);
+        newSchemaName = name.GetString();
+
+        var existingSchemasName = await _trainRepository.GetSchemaNameAsync();
+        if (existingSchemasName.Any(s => s == newSchemaName))
+        {
+            throw new ApplicationException("Схема с таким названием уже существует");
+        }
+        var entity = new SchemaEntity
+        {
+            Schema = request.JsonSchema.GetRawText(),
+        };
+        await _trainRepository.AddSchema(entity);
+        return true;
+    }
+
+    public async Task<bool> UpdateSchemaAsync(int id, SaveSchemaRequest request)
+    {
+        string newSchemaName;
+
+        request.JsonSchema.TryGetProperty("schemaName", out var name);
+        newSchemaName = name.GetString();
+
+        var oldSchemaName = await _trainRepository.GetSchemaNameByIdAsync(id);
+        if (oldSchemaName != newSchemaName)
+        {
+            var existingSchemasName = await _trainRepository.GetSchemaNameAsync();
+
+            if (existingSchemasName.Any(s => s == newSchemaName))
+            {
+                throw new ApplicationException("Схема с таким названием уже существует");
+            }
+        }
+
+        var schema = await _trainRepository.GetSchemaByIdAsync(id);
+        schema.Schema = request.JsonSchema.GetRawText();
+        await _trainRepository.UpdateSchema(schema);
+        return true;
+    }
+
+    public async Task<bool> DeleteSchemaAsync(int id)
+    {
+        var schema = await _trainRepository.GetSchemaByIdAsync(id);
+        await _trainRepository.DeleteSchema(schema);
+        return true;
+    }
+
+    public async Task<bool> CreateTrainAsync(CreateTrainRequest request)
+    {
+        int idTrainType = await _trainRepository.GetTypeTrainIdAsync(request.TrainType);
+        var trainEntity = new TrainEntity
+        {
+            Number_train = request.TrainNumber,
+            Id_type_train = idTrainType,
+            Name = request.TrainName,
+            Vans = new List<VanEntity>()
+        };
+
+        foreach (var c in request.Vans)
+        {
+            var schema = await _trainRepository.GetSchemaByIdAsync(c.SchemaId);
+            var json = JsonDocument.Parse(schema.Schema);
+            json.RootElement.TryGetProperty("schemaType", out var typeProp);
+            var typeVan = typeProp.GetString();
+            var idVanType = await _trainRepository.GetTypeVanIdAsync(typeVan);
+            var vanEntity = new VanEntity
+            {
+                Number_van = c.VanNumber,
+                Id_type_van = idVanType,
+                Id_schema = c.SchemaId,
+                Seats = new List<SeatEntity>()
+            };
+
+            await GenerateSeats(vanEntity, json, typeVan);
+            trainEntity.Vans.Add(vanEntity);
+        }
+        await _trainRepository.AddTrain(trainEntity);
+        return true;
+    }
+
+    public async Task<bool> DeleteTrainAsync(int number)
+    {
+        var train = await _trainRepository.GetTrainByNumberAsync(number);
+        await _trainRepository.DeleteTrain(train);
+        return true;
+    }
+
+    public async Task<IEnumerable<TrainDetailsDto>> GetTrainsAsync()
+    {
+        var train = await _trainRepository.GetAllTrainsAsync();
+        return train.Select(_trainMapper.Map);
+    }
+
+    private async Task GenerateSeats(VanEntity vanEntity, JsonDocument json, string typeVan)
+    {
+        var root = json.RootElement;
+
+        if (typeVan == "Купе" || typeVan == "Плацкарт")
+        {
+            if (json.RootElement.TryGetProperty("compartments", out var compartments))
+            {
+                foreach (var comp in compartments.EnumerateArray())
+                {
+                    var seats = comp.GetProperty("seats").EnumerateArray().ToList();
+                    for (int i = 0; i < seats.Count; i++)
+                    {
+                        var seatNum = seats[i].GetInt32();
+                        var seatType = seats.Count == 2 ? "сидячее" : (i % 2 == 0 ? "нижнее" : "верхнее");
+                        vanEntity.Seats.Add(new SeatEntity
+                        {
+                            Number_seat = seatNum,
+                            Id_type_seat = await _trainRepository.GetTypeSeatIdAsync(seatType)
+                        });
+                    }
+                }
+            }
+            if (typeVan == "Плацкарт" && json.RootElement.TryGetProperty("sideSeats", out var sideSeats))
+            {
+                for (int i = 0; i < sideSeats.GetArrayLength(); i++)
+                {
+                    var seatNum = sideSeats[i].GetInt32();
+                    var seatType = i % 2 == 0 ? "нижнее боковое" : "верхнее боковое";
+                    vanEntity.Seats.Add(new SeatEntity
+                    {
+                        Number_seat = seatNum,
+                        Id_type_seat = await _trainRepository.GetTypeSeatIdAsync(seatType)
+                    });
+                }
+            }
+        }
+        else if (typeVan == "Сидячий")
+        {
+            if (json.RootElement.TryGetProperty("rows", out var rows))
+            {
+                foreach (var row in rows.EnumerateArray())
+                {
+                    foreach (var side in new[] { "leftSeats", "rightSeats" })
+                    {
+                        if (row.TryGetProperty(side, out var seatList))
+                        {
+                            foreach (var seat in seatList.EnumerateArray())
+                            {
+                                vanEntity.Seats.Add(new SeatEntity
+                                {
+                                    Number_seat = seat.GetInt32(),
+                                    Id_type_seat = 5
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public async Task<bool> UpdateTrainAsync(TrainDetailsDto request)
+    {
+        var train = await _trainRepository.GetTrainByNumberAsync(request.TrainNumber);
+        int idTrainType = await _trainRepository.GetTypeTrainIdAsync(request.TrainType);
+
+        train.Id_type_train = idTrainType;
+        train.Name = request.TrainName;
+
+        await _trainRepository.DeleteVans(train.Vans);
+        train.Vans.Clear();
+        foreach (var c in request.Vans)
+        {
+            var schema = await _trainRepository.GetSchemaByIdAsync(c.SchemaId);
+            var json = JsonDocument.Parse(schema.Schema);
+            json.RootElement.TryGetProperty("schemaType", out var typeProp);
+            var typeVan = typeProp.GetString();
+            var idVanType = await _trainRepository.GetTypeVanIdAsync(typeVan);
+            var vanEntity = new VanEntity
+            {
+                Number_van = c.VanNumber,
+                Id_type_van = idVanType,
+                Id_schema = c.SchemaId,
+                Seats = new List<SeatEntity>()
+            };
+
+            await GenerateSeats(vanEntity, json, typeVan);
+
+            train.Vans.Add(vanEntity);
+        }
+        await _trainRepository.UpdateTrain(train);
+        return true;
+    }
+
+    public async Task<IEnumerable<string>> GetTypeTrainsAsync()
+    {
+        return await _trainRepository.GetTypeTrainsAsync();
     }
 }

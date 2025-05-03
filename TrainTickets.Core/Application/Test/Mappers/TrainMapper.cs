@@ -42,4 +42,33 @@ public class TrainMapper : ITrainMapper
             OccupiedSeatNumbers = seats
         };
     }
+
+    public SchemaDto Map(SchemaEntity entity)
+    {
+        return new SchemaDto()
+        {
+            Id_schema = entity.Id_schema,
+            Schema = entity.Schema,
+        };
+    }
+
+    public TrainDetailsDto Map(TrainEntity entity)
+    {
+        if (entity == null)
+        {
+            throw new ArgumentNullException(nameof(entity));
+        }
+        return new TrainDetailsDto()
+        {
+            TrainNumber = entity.Number_train,
+            TrainName = entity.Name,
+            TrainType = entity.Type_train.Name,
+            Vans = entity.Vans.Select(v=>new VanDetailsDto
+            {
+                VanNumber = v.Number_van,
+                SchemaId = v.Id_schema,
+                Schema = v.Schema.Schema
+            }).ToList(),
+        };
+    }
 }
