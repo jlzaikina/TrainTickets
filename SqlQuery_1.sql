@@ -13,6 +13,15 @@ CREATE SEQUENCE public."Book_id_book_seq"
 	START 1
 	CACHE 1
 	NO CYCLE;
+-- DROP SEQUENCE public."Schema_id_shema_seq";
+
+CREATE SEQUENCE public."Schema_id_shema_seq"
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
 -- DROP SEQUENCE public."Ticket_id_ticket_seq";
 
 CREATE SEQUENCE public."Ticket_id_ticket_seq"
@@ -106,6 +115,19 @@ CREATE TABLE public."City" (
 );
 
 
+-- public."Schema" определение
+
+-- Drop table
+
+-- DROP TABLE public."Schema";
+
+CREATE TABLE public."Schema" (
+	"Id_schema" int4 DEFAULT nextval('"Schema_id_shema_seq"'::regclass) NOT NULL,
+	"Schema" jsonb NOT NULL,
+	CONSTRAINT schema_pk PRIMARY KEY ("Id_schema")
+);
+
+
 -- public."Type_seat" определение
 
 -- Drop table
@@ -170,19 +192,6 @@ CREATE TABLE public."User" (
 	CONSTRAINT user_unique UNIQUE ("Login"),
 	CONSTRAINT user_unique_1 UNIQUE ("Email"),
 	CONSTRAINT user_unique_2 UNIQUE ("Phone")
-);
-
-
--- public."Schema" определение
-
--- Drop table
-
--- DROP TABLE public."Schema";
-
-CREATE TABLE public."Schema" (
-	"Id_schema" int4 DEFAULT nextval('"Schema_id_shema_seq"'::regclass) NOT NULL,
-	"Schema" json NOT NULL,
-	CONSTRAINT schema_pk PRIMARY KEY ("Id_schema")
 );
 
 
@@ -267,10 +276,10 @@ CREATE TABLE public."Van" (
 	"Number_van" int4 NOT NULL,
 	"Number_train" int4 NOT NULL,
 	"Id_type_van" int4 NOT NULL,
-	"Id_schema" int4 NOT NULL,
+	"Id_schema" int4 NULL,
 	CONSTRAINT van_pk PRIMARY KEY ("Id_van"),
-	CONSTRAINT van_schema_fk FOREIGN KEY ("Id_schema") REFERENCES public."Schema"("Id_schema"),
-	CONSTRAINT van_train_fk FOREIGN KEY ("Number_train") REFERENCES public."Train"("Number_train"),
+	CONSTRAINT van_schema_fk FOREIGN KEY ("Id_schema") REFERENCES public."Schema"("Id_schema") ON DELETE CASCADE,
+	CONSTRAINT van_train_fk FOREIGN KEY ("Number_train") REFERENCES public."Train"("Number_train") ON DELETE CASCADE,
 	CONSTRAINT van_type_van_fk FOREIGN KEY ("Id_type_van") REFERENCES public."Type_van"("Id_type_van")
 );
 
@@ -289,7 +298,7 @@ CREATE TABLE public."Schedule" (
 	"Number_train" int4 NOT NULL,
 	CONSTRAINT schedule_pk PRIMARY KEY ("Id_schedule"),
 	CONSTRAINT schedule_route_fk FOREIGN KEY ("Id_route") REFERENCES public."Route"("Id_route"),
-	CONSTRAINT schedule_train_fk FOREIGN KEY ("Number_train") REFERENCES public."Train"("Number_train")
+	CONSTRAINT schedule_train_fk FOREIGN KEY ("Number_train") REFERENCES public."Train"("Number_train") ON DELETE CASCADE
 );
 
 
@@ -306,7 +315,7 @@ CREATE TABLE public."Seat" (
 	"Id_type_seat" int4 NOT NULL,
 	CONSTRAINT seat_pk PRIMARY KEY ("Id_seat"),
 	CONSTRAINT seat_type_seat_fk FOREIGN KEY ("Id_type_seat") REFERENCES public."Type_seat"("Id_type_seat"),
-	CONSTRAINT seat_van_fk FOREIGN KEY ("Id_van") REFERENCES public."Van"("Id_van")
+	CONSTRAINT seat_van_fk FOREIGN KEY ("Id_van") REFERENCES public."Van"("Id_van") ON DELETE CASCADE
 );
 
 
@@ -322,7 +331,7 @@ CREATE TABLE public."Book" (
 	"Id_user" int8 NOT NULL,
 	"Id_book" int4 DEFAULT nextval('"Book_id_book_seq"'::regclass) NOT NULL,
 	CONSTRAINT book_pk PRIMARY KEY ("Id_book"),
-	CONSTRAINT book_schedule_fk FOREIGN KEY ("Id_schedule") REFERENCES public."Schedule"("Id_schedule"),
+	CONSTRAINT book_schedule_fk FOREIGN KEY ("Id_schedule") REFERENCES public."Schedule"("Id_schedule") ON DELETE CASCADE,
 	CONSTRAINT book_user_fk FOREIGN KEY ("Id_user") REFERENCES public."User"("Id")
 );
 
@@ -340,7 +349,7 @@ CREATE TABLE public."Ticket" (
 	"Id_passenger" int8 NOT NULL,
 	"Id_ticket" int4 DEFAULT nextval('"Ticket_id_ticket_seq"'::regclass) NOT NULL,
 	CONSTRAINT ticket_pk PRIMARY KEY ("Id_ticket"),
-	CONSTRAINT ticket_book_fk FOREIGN KEY ("Id_book") REFERENCES public."Book"("Id_book"),
+	CONSTRAINT ticket_book_fk FOREIGN KEY ("Id_book") REFERENCES public."Book"("Id_book") ON DELETE CASCADE,
 	CONSTRAINT ticket_passenger_fk FOREIGN KEY ("Id_passenger") REFERENCES public."Passenger"("Id_passenger"),
-	CONSTRAINT ticket_seat_fk FOREIGN KEY ("Id_seat") REFERENCES public."Seat"("Id_seat")
+	CONSTRAINT ticket_seat_fk FOREIGN KEY ("Id_seat") REFERENCES public."Seat"("Id_seat") ON DELETE CASCADE
 );
