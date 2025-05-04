@@ -93,4 +93,9 @@ public class PassHandler: IPassengerHandler
         var passEntity = await _passRepository.GetAllPassengerAsync(userEntity.Id);
         return passEntity.Select(_passMapper.Map);
     }
+
+    public async Task<bool> IsSelfPassengerAsync(string login, long passengerId)
+    {
+        return await _passRepository.IsSelfPassengerAsync(login, passengerId);
+    }
 }

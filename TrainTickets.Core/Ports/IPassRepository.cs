@@ -21,4 +21,6 @@ public interface IPassRepository
     Task<bool> IsPassportUniqueForUserAsync(string passportNumber, long userId, long? excludeUserId = null);
 
     Task<IEnumerable<PassengerEntity>> GetAllPassengerAsync(long id);
+
+    Task<bool> IsSelfPassengerAsync(string login, long passengerId);
 }

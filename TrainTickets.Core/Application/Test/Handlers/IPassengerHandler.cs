@@ -17,4 +17,6 @@ public interface IPassengerHandler
 
     Task<IEnumerable<PassengerDto>> GetPassengerDataAsync(string login);
     Task<IEnumerable<PassengerDto>> GetPassengerDataForBookAsync(string login);
+
+    Task<bool> IsSelfPassengerAsync(string login, long passengerId);
 }

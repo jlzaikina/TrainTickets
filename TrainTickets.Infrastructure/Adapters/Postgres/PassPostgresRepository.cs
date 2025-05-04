@@ -92,4 +92,12 @@ public class PassPostgresRepository: IPassRepository
                 .Where(p => p.Id_user == id) // Фильтруем по UserId
                 .ToListAsync();
     }
+
+    public async Task<bool> IsSelfPassengerAsync(string login, long passengerId)
+    {
+        return await _dbContext.Passengers
+            .AnyAsync(p => p.Id_passenger == passengerId &&
+                         p.User.Login == login &&
+                         p.Is_self);
+    }
 }
