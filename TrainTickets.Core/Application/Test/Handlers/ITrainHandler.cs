@@ -34,4 +34,6 @@ public interface ITrainHandler
     Task<bool> UpdateTrainAsync(TrainDetailsDto request);
 
     Task<IEnumerable<string>> GetTypeTrainsAsync();
+
+    Task<bool> CheckUpdateTrainAsync(int numberTrain);
 }

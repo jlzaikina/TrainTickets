@@ -55,4 +55,6 @@ public interface ITrainRepository
     Task UpdateTrain(TrainEntity entity);
 
     Task<IEnumerable<string>> GetTypeTrainsAsync();
+
+    Task<bool> CheckUpdateTrainAsync(int numberTrain);
 }

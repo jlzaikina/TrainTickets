@@ -390,4 +390,9 @@ public class TrainHandler : ITrainHandler
     {
         return await _trainRepository.GetTypeTrainsAsync();
     }
+
+    public async Task<bool> CheckUpdateTrainAsync(int numberTrain)
+    {
+        return await _trainRepository.CheckUpdateTrainAsync(numberTrain);
+    }
 }
