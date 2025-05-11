@@ -16,10 +16,10 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Получить расписание
+    /// Получение данных о поезде
     /// </summary>
+    /// <param><see cref="InfoTrainRequest"/></param>
     /// <returns><see cref="TrainDto"/></returns>
-    /// 
     [HttpPost]
     [Route("/api/v1/train/get-info")]
     public async Task<TrainDto> GetInfoTrainInSchedule([FromBody] InfoTrainRequest request)
@@ -28,6 +28,11 @@ public class TrainController : ControllerBase
         return await entity;
     }
 
+    /// <summary>
+    /// Получение данных для бронирования места
+    /// </summary>
+    /// <param><see cref="InfoTrainRequest"/></param>
+    /// <returns><see cref="VanDto"/></returns>
     [HttpPost]
     [Route("/api/v1/train/get-shema")]
     public async Task<VanDto> GetShemaVan([FromBody] InfoVanRequest request)
@@ -36,6 +41,11 @@ public class TrainController : ControllerBase
         return await ent;
     }
 
+    /// <summary>
+    /// Получение стоимости места
+    /// </summary>
+    /// <param><see cref="CheckRequest"/></param>
+    /// <returns>Стоимость</returns>
     [HttpPost]
     [Route("/api/v1/train/get-price")]
     public async Task<double> GetPrice([FromBody] CheckRequest request)
@@ -44,6 +54,11 @@ public class TrainController : ControllerBase
         return await ent;
     }
 
+    /// <summary>
+    /// Создание брони и билета
+    /// </summary>
+    /// <param><see cref="BookRequest"/></param>
+    /// <returns><see cref="TicketDto"/></returns>
     [HttpPost]
     [Route("/api/v1/train/create-book")]
     public async Task<ActionResult<TicketDto>> CreateBooking([FromBody] BookRequest request)
@@ -60,9 +75,9 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Получить номера поездов
+    /// Получение номеров поездов
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <returns>Список номеров</returns>
     [HttpGet]
     [Route("/api/v1/train/get-van-number")]
     public async Task<IEnumerable<int>> GetVanNumber()
@@ -82,9 +97,9 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Получить поезда
+    /// Получить схему
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <returns><see cref="SchemaDto"/></returns>
     [HttpGet]
     [Route("/api/v1/train/get-schema/{schemaId}")]
     public async Task<SchemaDto> GetSchema(int schemaId)
@@ -93,10 +108,12 @@ public class TrainController : ControllerBase
         return await _trainHandler.GetSchemaAsync(schemaId);
 
     }
+
     /// <summary>
-    /// Сохранить новую схему
+    /// Добавить схему
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param><see cref="SaveSchemaRequest"/></param>
+    /// <returns>Истинность выполнения</returns>
     [HttpPost]
     [Route("/api/v1/train/save-schema")]
     public async Task<ActionResult<bool>> SaveSchema([FromBody] SaveSchemaRequest request)
@@ -112,9 +129,10 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Изменить схему
+    /// Изменение схемы
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param><see cref="SaveSchemaRequest"/></param>
+    /// <returns>Истинность выполнения</returns>
     [HttpPut]
     [Route("/api/v1/train/update-schema/{id}")]
     public async Task<ActionResult<bool>> UpdateSchema(int id, [FromBody] SaveSchemaRequest request)
@@ -130,9 +148,10 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Изменить схему
+    /// Удалить схему
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param>Ид схемы</param>
+    /// <returns><see cref="TicketDto"/></returns>
     [HttpPost]
     [Route("/api/v1/train/delete-schema/{id}")]
     public async Task<ActionResult<bool>> DeleteSchema(int id)
@@ -148,9 +167,10 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Создать поезд
+    /// Добавить поезд
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param><see cref="CreateTrainRequest"/></param>
+    /// <returns>Истинность добавления</returns>
     [HttpPost]
     [Route("/api/v1/train/create-train")]
     public async Task<ActionResult<bool>> CreateTrain([FromBody] CreateTrainRequest request)
@@ -168,7 +188,8 @@ public class TrainController : ControllerBase
     /// <summary>
     /// Удалить поезд
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param>Номер поезда</param>
+    /// <returns>Истинность удаления</returns>
     [HttpPost]
     [Route("/api/v1/train/delete-train/{numberTrain}")]
     public async Task<ActionResult<bool>> DeleteTrain(int numberTrain)
@@ -184,9 +205,9 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Получить поезда
+    /// Получение поездов
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <returns><see cref="TrainDetailsDto"/></returns>
     [HttpGet]
     [Route("/api/v1/train/get-trains")]
     public async Task<IEnumerable<TrainDetailsDto>> GetTrains()
@@ -197,9 +218,10 @@ public class TrainController : ControllerBase
     }
 
     /// <summary>
-    /// Изменить поезд
+    /// Изменение поезда
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <param><see cref="TrainDetailsDto"/></param>
+    /// <returns>Истинность выполнения</returns>
     [HttpPut]
     [Route("/api/v1/train/update-train")]
     public async Task<ActionResult<bool>> UpdateTrain([FromBody] TrainDetailsDto request)
@@ -212,13 +234,25 @@ public class TrainController : ControllerBase
     /// <summary>
     /// Получить типы поездов
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <returns>Список названий</returns>
     [HttpGet]
     [Route("/api/v1/train/get-type-trains")]
     public async Task<IEnumerable<string>> GetTypeTrains()
     {
 
         return await _trainHandler.GetTypeTrainsAsync();
+
+    }
+
+    /// <summary>
+    /// Проверка перед изменением поезда
+    /// </summary>
+    [HttpPost]
+    [Route("/api/v1/train/check-update")]
+    public async Task<ActionResult<bool>> CheckUpdateTrain(int numberTrain)
+    {
+
+        return await _trainHandler.CheckUpdateTrainAsync(numberTrain);
 
     }
 }

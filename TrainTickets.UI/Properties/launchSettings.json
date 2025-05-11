@@ -4,7 +4,7 @@
     "TrainTicketsApp": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:8081",
+      "applicationUrl": "http://localhost:8081", //https://trains-tickets.ru
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CONNECTION_STRING": "Server=localhost;Port=5432;User Id=postgres;Password=root;Database=ticket;"

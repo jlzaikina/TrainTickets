@@ -48,7 +48,7 @@ public class ScheduleController: ControllerBase
     /// <summary>
     /// Получить список городов
     /// </summary>
-    /// <returns><see cref="ScheduleDto"/></returns>
+    /// <returns><see cref="CityDto"/></returns>
     [HttpGet]
     [Route("/api/v1/shedule/get-city")]
     public async Task<IEnumerable<CityDto>> GetCities()
@@ -59,8 +59,8 @@ public class ScheduleController: ControllerBase
     /// <summary>
     /// Удаление рейса
     /// </summary>
-    /// <param><see cref="LogoutRequest"/></param>
-    /// <returns>Истинность выхода</returns>
+    /// <param><see cref="InfoTrainRequest"/></param>
+    /// <returns>Истинность удаления</returns>
     [HttpPost]
     [Route("/api/v1/shedule/delete")]
     public async Task<ActionResult<bool>> DeleteTrip([FromBody] InfoTrainRequest request)
@@ -79,8 +79,8 @@ public class ScheduleController: ControllerBase
     /// <summary>
     /// Редактирование рейса
     /// </summary>
-    /// <param><see cref="LogoutRequest"/></param>
-    /// <returns>Истинность выхода</returns>
+    /// <param><see cref="UpdateScheduleRequest"/></param>
+    /// <returns>Истинность редактирования</returns>
     [HttpPut]
     [Route("/api/v1/shedule/update")]
     public async Task<ActionResult<bool>> UpdateTrip([FromBody] UpdateScheduleRequest request)
@@ -90,12 +90,17 @@ public class ScheduleController: ControllerBase
             var result = await _scheduleHandler.UpdateTripAsync(request);
             return Ok(result);
         }
-        catch (Exception)
+        catch (ApplicationException ex)
         {
-            return StatusCode(500, "Ошибка обновления");
+            return Conflict(ex.Message);
         }
     }
 
+    /// <summary>
+    /// Добавление рейса
+    /// </summary>
+    /// <param><see cref="CreateScheduleRequest"/></param>
+    /// <returns>Истинность добавления</returns>
     [HttpPost]
     [Route("/api/v1/shedule/create")]
     public async Task<ActionResult<bool>> CreateTrip([FromBody] CreateScheduleRequest request)
@@ -105,12 +110,16 @@ public class ScheduleController: ControllerBase
             var result = await _scheduleHandler.CreateTripAsync(request);
             return Ok(result);
         }
-        catch (Exception)
+        catch (ApplicationException ex)
         {
-            return StatusCode(500, "Ошибка добавления");
+            return Conflict(ex.Message);
         }
     }
 
+    /// <summary>
+    /// Получение маршрутов
+    /// </summary>
+    /// <returns><see cref="RouteDto"/></returns>
     [HttpGet]
     [Route("/api/v1/shedule/get-routes")]
     public async Task<IEnumerable<RouteDto>> GetRoutes()

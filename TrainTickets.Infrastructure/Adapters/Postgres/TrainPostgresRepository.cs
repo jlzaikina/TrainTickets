@@ -293,4 +293,11 @@ public class TrainPostgresRepository : ITrainRepository
             .Select(t => t.Name)
             .ToListAsync();
     }
+
+    public async Task<bool> CheckUpdateTrainAsync(int numberTrain)
+    {
+        return await _dbContext.Schedules
+            .Include(t => t.Train)
+            .AnyAsync(t => t.Train.Number_train== numberTrain);
+    }
 }

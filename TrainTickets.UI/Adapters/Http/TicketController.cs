@@ -18,6 +18,7 @@ public class TicketController : ControllerBase
     /// <summary>
     /// Получить брони
     /// </summary>
+    /// <param>Логин</param>
     /// <returns><see cref="BookDto"/></returns>
     [HttpGet]
     [Route("/api/v1/ticket/get-all/{login}")]
@@ -25,6 +26,12 @@ public class TicketController : ControllerBase
     {
         return await _ticketHandler.GetBookAsync(login);
     }
+
+
+    /// <summary>
+    /// Генерация билета
+    /// <param>Id билета</param>
+    /// </summary>
     [HttpGet]
     [Route("/api/v1/ticket/get-ticket/{id}/pdf")]
     public async Task<IActionResult> GetTicketPdf(int id)
@@ -35,6 +42,13 @@ public class TicketController : ControllerBase
         var pdfBytes = _ticketHandler.GenerateTicketPdf(ticket);
         return File(pdfBytes, "application/pdf", $"{ticket.Passenger_name.Split(' ')[0]}{id}.pdf");
     }
+
+
+    /// <summary>
+    /// Удалить билет
+    /// </summary>
+    /// <param>Логин  и Ид билета</param>
+    /// <returns>Истинность удаления</returns>
     [HttpPost]
     [Route("/api/v1/ticket/delete-ticket/{id}/{login}")]
     public async Task<ActionResult<bool>> DeleteTicket(int id, string login)
@@ -50,6 +64,11 @@ public class TicketController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Отправка билета на почту
+    /// </summary>
+    /// <param>Логин  и Ид билета</param>
+    /// <returns>Истинность выполнения</returns>
     [HttpPost]
     [Route("/api/v1/ticket/send-ticket/{id}/{login}")]
     public async Task<ActionResult<bool>> SendTicket(int id, string login)
