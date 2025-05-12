@@ -24,7 +24,7 @@ public class SchedulePostgresRepository: IScheduleRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<ScheduleEntity>> GetScheduleAsync()
+    public async Task<IEnumerable<ScheduleEntity>> GetSchedulesAsync()
     {
         return await _dbContext.Schedules
             .Include(s => s.Route)
@@ -148,5 +148,17 @@ public class SchedulePostgresRepository: IScheduleRepository
                .Include(r => r.DepartureCity)
                .Include(r => r.ArrivalCity)
            .ToListAsync();
+    }
+
+    public async Task<ScheduleEntity> GetScheduleAsync(InfoTrainRequest request)
+    {
+        return await _dbContext.Schedules
+            .Include(s => s.Train)
+                .ThenInclude(t => t.Vans)
+                    .ThenInclude(c => c.Schema)
+            .Include(s => s.Train)
+                .ThenInclude(t => t.Vans)
+                    .ThenInclude(c => c.Seats)
+            .FirstOrDefaultAsync(s => s.Number_train == request.Number_train && s.Date_departure.Date == request.DateDeparture.Date);
     }
 }

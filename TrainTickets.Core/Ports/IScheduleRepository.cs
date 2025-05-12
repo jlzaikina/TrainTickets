@@ -19,8 +19,8 @@ public interface IScheduleRepository
     /// Получить расписание
     /// </summary>
     /// <returns><see cref="ScheduleEntity"/></returns>
-    Task<IEnumerable<ScheduleEntity>> GetScheduleAsync();
-
+    Task<IEnumerable<ScheduleEntity>> GetSchedulesAsync();
+    Task<ScheduleEntity>  GetScheduleAsync(InfoTrainRequest request);
     Task<ScheduleEntity> GetOneScheduleAsync(UpdateScheduleRequest request);
     Task<RouteEntity> FindRouteAsync(int departureCityId, int arrivalCityId);
     Task<CityEntity> GetCityByNameAsync(string cityName);
