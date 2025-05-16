@@ -255,4 +255,16 @@ public class TrainController : ControllerBase
         return await _trainHandler.CheckUpdateTrainAsync(numberTrain);
 
     }
+
+    /// <summary>
+    /// Проверка перед изменением схемы
+    /// </summary>
+    [HttpPost]
+    [Route("/api/v1/train/check-update-schema/{schemaId}")]
+    public async Task<ActionResult<bool>> CheckUpdateSchema(int schemaId)
+    {
+
+        return await _trainHandler.CheckUpdateSchemaAsync(schemaId);
+
+    }
 }

@@ -149,16 +149,4 @@ public class SchedulePostgresRepository: IScheduleRepository
                .Include(r => r.ArrivalCity)
            .ToListAsync();
     }
-
-    public async Task<ScheduleEntity> GetScheduleAsync(InfoTrainRequest request)
-    {
-        return await _dbContext.Schedules
-            .Include(s => s.Train)
-                .ThenInclude(t => t.Vans)
-                    .ThenInclude(c => c.Schema)
-            .Include(s => s.Train)
-                .ThenInclude(t => t.Vans)
-                    .ThenInclude(c => c.Seats)
-            .FirstOrDefaultAsync(s => s.Number_train == request.Number_train && s.Date_departure.Date == request.DateDeparture.Date);
-    }
 }

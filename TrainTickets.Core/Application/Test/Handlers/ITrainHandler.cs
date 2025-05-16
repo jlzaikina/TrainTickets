@@ -36,4 +36,6 @@ public interface ITrainHandler
     Task<IEnumerable<string>> GetTypeTrainsAsync();
 
     Task<bool> CheckUpdateTrainAsync(int numberTrain);
+
+    Task<bool> CheckUpdateSchemaAsync(int schemaId);
 }

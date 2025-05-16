@@ -17,9 +17,6 @@ public class VanEntity
     public int Number_train { get; set; }
     public int Id_type_van { get; set; }
     public int Id_schema { get; set; }
-
-    [Column(TypeName = "jsonb")]
-    public string Copy_schema { get; set; }
     public List<SeatEntity> Seats { get; set; } = new();
 
     [ForeignKey("Number_train")]

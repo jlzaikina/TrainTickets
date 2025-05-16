@@ -38,7 +38,7 @@ public class TrainMapper : ITrainMapper
     {
         return new VanDto()
         {
-            CarriageSchemaJson = entity.Copy_schema,
+            CarriageSchemaJson = entity.Schema.Schema,
             OccupiedSeatNumbers = seats
         };
     }
