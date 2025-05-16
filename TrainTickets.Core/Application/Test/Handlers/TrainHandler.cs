@@ -234,15 +234,6 @@ public class TrainHandler : ITrainHandler
 
         var schema = await _trainRepository.GetSchemaByIdAsync(id);
         schema.Schema = request.JsonSchema.GetRawText();
-
-        var activeTrains = await _trainRepository.GetActiveTrainsAsync();
-
-        var unactiveVans = await _trainRepository.GetUnactiveVansAsync(activeTrains, id);
-
-        foreach (var van in unactiveVans)
-        {
-            van.Copy_schema = request.JsonSchema.GetRawText();
-        }
         
         await _trainRepository.UpdateSchema(schema);
         return true;
@@ -277,7 +268,6 @@ public class TrainHandler : ITrainHandler
             {
                 Number_van = c.VanNumber,
                 Id_type_van = idVanType,
-                Copy_schema = schema.Schema,
                 Id_schema = c.SchemaId,
                 Seats = new List<SeatEntity>()
             };
@@ -385,7 +375,6 @@ public class TrainHandler : ITrainHandler
             {
                 Number_van = c.VanNumber,
                 Id_type_van = idVanType,
-                Copy_schema = schema.Schema,
                 Id_schema = c.SchemaId,
                 Seats = new List<SeatEntity>()
             };
@@ -406,5 +395,10 @@ public class TrainHandler : ITrainHandler
     public async Task<bool> CheckUpdateTrainAsync(int numberTrain)
     {
         return await _trainRepository.CheckUpdateTrainAsync(numberTrain);
+    }
+
+    public async Task<bool> CheckUpdateSchemaAsync(int schemaId)
+    {
+        return await _trainRepository.CheckUpdateSchemaAsync(schemaId);
     }
 }

@@ -27,11 +27,8 @@ public interface ITrainRepository
     Task AddBook(BookEntity entity);
 
     Task<IEnumerable<int>> GetVanNumberAsync();
-    Task<IEnumerable<VanEntity>> GetVansAsync(int numberTrain);
     Task<IEnumerable<SchemaEntity>> GetAllSchemaAsync();
     Task<IEnumerable<string>> GetSchemaNameAsync();
-    Task<IEnumerable<int>> GetActiveTrainsAsync();
-    Task<IEnumerable<VanEntity>> GetUnactiveVansAsync(IEnumerable<int> activeTrains, int id);
     Task<string> GetSchemaNameByIdAsync(int id);
     Task AddSchema(SchemaEntity entity);
 
@@ -51,7 +48,6 @@ public interface ITrainRepository
     Task AddTrain(TrainEntity entity);
 
     Task<IEnumerable<TrainEntity>> GetAllTrainsAsync();
-    Task DeleteSeats(IEnumerable<SeatEntity> entity);
     Task DeleteVans(IEnumerable<VanEntity> entity);
 
     Task UpdateTrain(TrainEntity entity);
@@ -59,4 +55,6 @@ public interface ITrainRepository
     Task<IEnumerable<string>> GetTypeTrainsAsync();
 
     Task<bool> CheckUpdateTrainAsync(int numberTrain);
+
+    Task<bool> CheckUpdateSchemaAsync(int schemaId);
 }

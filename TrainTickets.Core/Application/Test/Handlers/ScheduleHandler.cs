@@ -48,84 +48,9 @@ public class ScheduleHandler: IScheduleHandler
     }
 
     public async Task<bool> DeleteTripAsync(InfoTrainRequest request)
-    {
-        var schedule = await _scheduleRepository.GetScheduleAsync(request);
-
-        var vans = await _trainRepository.GetVansAsync(request.Number_train);
-
-        foreach (var van in vans)
-        {
-            van.Copy_schema = van.Schema.Schema;
-            await _trainRepository.DeleteSeats(van.Seats);
-            van.Seats.Clear();
-            var json = JsonDocument.Parse(van.Copy_schema);
-            json.RootElement.TryGetProperty("schemaType", out var typeProp);
-            var typeVan = typeProp.GetString();
-            await GenerateSeats(van, json, typeVan);
-        }
+    {   
         await _scheduleRepository.DeleteTrip(request);
         return true;
-    }
-    private async Task GenerateSeats(VanEntity vanEntity, JsonDocument json, string typeVan)
-    {
-        var root = json.RootElement;
-
-        if (typeVan == "Купе" || typeVan == "Плацкарт" || typeVan == "СВ")
-        {
-            if (json.RootElement.TryGetProperty("compartments", out var compartments))
-            {
-                foreach (var comp in compartments.EnumerateArray())
-                {
-                    var seats = comp.GetProperty("seats").EnumerateArray().ToList();
-                    for (int i = 0; i < seats.Count; i++)
-                    {
-                        var seatNum = seats[i].GetInt32();
-                        var seatType = seats.Count == 2 ? "нижнее" : (i % 2 == 0 ? "нижнее" : "верхнее");
-                        vanEntity.Seats.Add(new SeatEntity
-                        {
-                            Number_seat = seatNum,
-                            Id_type_seat = await _trainRepository.GetTypeSeatIdAsync(seatType)
-                        });
-                    }
-                }
-            }
-            if (typeVan == "Плацкарт" && json.RootElement.TryGetProperty("sideSeats", out var sideSeats))
-            {
-                for (int i = 0; i < sideSeats.GetArrayLength(); i++)
-                {
-                    var seatNum = sideSeats[i].GetInt32();
-                    var seatType = i % 2 == 0 ? "нижнее боковое" : "верхнее боковое";
-                    vanEntity.Seats.Add(new SeatEntity
-                    {
-                        Number_seat = seatNum,
-                        Id_type_seat = await _trainRepository.GetTypeSeatIdAsync(seatType)
-                    });
-                }
-            }
-        }
-        else if (typeVan == "Сидячий")
-        {
-            if (json.RootElement.TryGetProperty("rows", out var rows))
-            {
-                foreach (var row in rows.EnumerateArray())
-                {
-                    foreach (var side in new[] { "leftSeats", "rightSeats" })
-                    {
-                        if (row.TryGetProperty(side, out var seatList))
-                        {
-                            foreach (var seat in seatList.EnumerateArray())
-                            {
-                                vanEntity.Seats.Add(new SeatEntity
-                                {
-                                    Number_seat = seat.GetInt32(),
-                                    Id_type_seat = 5
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
     public async Task<bool> UpdateTripAsync(UpdateScheduleRequest request)
     {

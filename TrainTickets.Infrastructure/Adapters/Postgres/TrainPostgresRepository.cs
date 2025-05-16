@@ -272,20 +272,6 @@ public class TrainPostgresRepository : ITrainRepository
             throw;
         }
     }
-    public async Task DeleteSeats(IEnumerable<SeatEntity> entity)
-    {
-        try
-        {
-            _dbContext.Seats.RemoveRange(entity);
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
-        {
-
-            throw;
-        }
-    }
-
     public async Task UpdateTrain(TrainEntity entity)
     {
         try
@@ -314,24 +300,11 @@ public class TrainPostgresRepository : ITrainRepository
             .AnyAsync(t => t.Train.Number_train== numberTrain);
     }
 
-    public async Task<IEnumerable<int>> GetActiveTrainsAsync()
+    public async Task<bool> CheckUpdateSchemaAsync(int schemaId)
     {
         return await _dbContext.Schedules
-            .Select(s=>s.Number_train)
-            .Distinct().ToListAsync();
-    }
-
-    public async Task<IEnumerable<VanEntity>> GetUnactiveVansAsync(IEnumerable<int> activeTrains, int id)
-    {
-        return await _dbContext.Vans
-            .Where(v => v.Id_schema == id && !activeTrains.Contains(v.Number_train)).ToListAsync();
-    }
-
-    public async Task<IEnumerable<VanEntity>> GetVansAsync(int numberTrain)
-    {
-        return await _dbContext.Vans
-            .Where(v => v.Number_train == numberTrain)
-            .Include(v => v.Schema)
-            .ToListAsync();
+        .Include(s => s.Train)
+            .ThenInclude(t => t.Vans)
+        .AnyAsync(s => s.Train.Vans.Any(v => v.Id_schema == schemaId));
     }
 }
