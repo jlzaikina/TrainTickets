@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис бронирования билетов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Сервис бронирования билетов</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+                <a href="index.html" id="back-to-schedule">На главную</a>
+		<a href="personal-cabinet.html" id="personal-cabinet-link">Личный кабинет</a>
+                <button id="logout-btn" class="icon-button">
+    		   <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+<main>
+<div class="booking-wrapper">
+ <div class="booking-container">
+        <div class="ticket-wrapper">
+            <div class="ticket-header">
+                <div class="ticket-number" id="ticketNumber">Билет №</div>
+            </div>
+            
+            <div id="ticketContent">
+                <div class="loading">
+                    <p>Загрузка информации о билете...</p>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="actions-wrapper">
+            <div class="action-card">
+<div class="ticket-footer">
+                <p>Это — Ваш билет. Обязательно распечатайте его перед поездкой. Не забудьте взять с собой документ, подтверждающий Вашу личность - проводник обязан его проверить.</p>
+                <p>Билет вы сможете найти в своём личном кабинете и на электронной почте, которую Вы указывали при регистрации.</p>
+            </div>
+                <a href="#" class="btn btn-download" id="downloadBtn">Скачать билет (PDF)
+                </a>
+                <button class="btn btn-cancel" id="cancelBtn">Отменить бронирование
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<footer class="fixed-footer">
+       <div class="footer-content">
+           <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+           <a href="#" id="about-developers">О разработчиках</a> |
+           <a href="#">О системе</a>
+           <div class="copyright">
+              Сервис бронирования железнодорожных билетов — Самара, 2025
+           </div>
+       </div>
+    </footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+    <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            // Получаем элементы DOM
+            const ticketContent = document.getElementById('ticketContent');
+            const ticketNumber = document.getElementById('ticketNumber');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const errorContainer = document.getElementById('errorContainer');
+            const closeButtons = document.querySelectorAll('.close');
+            // Получаем данные из localStorage
+            const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+            const selectedSeat = JSON.parse(sessionStorage.getItem('selectedSeat'));
+            const selectedPassenger = JSON.parse(sessionStorage.getItem('selectedPassenger'));
+            const login = localStorage.getItem('userLogin');
+            const originalDate = new Date(selectedTrain.departureDate);
+            const formattedOriginalDepartureTime = new Date(originalDate.getTime() - (originalDate.getTimezoneOffset() * 60000));
+            // Создаем объект для бронирования
+            const bookingRequest = {
+                number_train: selectedTrain.numberTrain,
+                dateDeparture: formattedOriginalDepartureTime.toISOString(),
+                number_van: parseInt(selectedSeat.vanNumber),
+                number_seat: parseInt(selectedSeat.seatNumber),
+                pass_id: selectedPassenger.id_pass,
+                type_van: selectedSeat.carriageType,
+                type_seat: selectedSeat.seatType,
+                login: login
+            };
+            
+            // Создаем бронирование при загрузке страницы
+            createBooking(bookingRequest);
+
+            closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    });
+            // Обработчики событий
+            downloadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (window.ticketId) {
+                    downloadTicket(window.ticketId);
+                } else {
+                    alert('ID билета не найден');
+                }
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                if (!window.ticketId) {
+                    alert('ID билета не найден');
+                    return;
+                }
+                
+                if (!confirm('Вы уверены, что хотите отменить этот билет? Это действие невозможно будет отменить!')) {
+                    return;
+                }
+                
+                cancelBooking(window.ticketId, login);
+            });
+            
+            // Функция создания бронирования
+            function createBooking(bookingData) {
+                fetch('http://localhost:8081/api/v1/train/create-book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+			window.location.href = 'booking.html';
+                        return response.text().then(text => {
+                    		throw new Error(`Ошибка: ${text}`);
+                	});
+                    }
+                    return response.json();
+                })
+                .then(ticket => {
+                    window.ticketId = ticket.id_ticket;
+                    ticketNumber.textContent = `Билет №${ticket.id_ticket}`;
+                    renderTicketInfo(ticket);
+                    // Автоматически отправляем билет на почту!!!!!!!!!!!!!!!!!!!!!!!
+                    sendTicketByEmail(ticket.id_ticket, login);
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+            }
+            
+            // Функция отображения информации о билете
+            function renderTicketInfo(ticket) {
+                const birthDate = new Date(selectedPassenger.date_birth);
+                const html = `
+                    <div class="ticket-grid">
+                        <div class="ticket-label">Поезд:</div>
+                        <div class="ticket-value">${ticket.train_number} ${ticket.train_name || ''}</div>
+                        
+                        <div class="ticket-label">Вагон:</div>
+                        <div class="ticket-value">${ticket.train_van} ${ticket.van_name}</div>
+                        
+                        <div class="ticket-label">Место:</div>
+                        <div class="ticket-value">${ticket.train_seat} ${ticket.seat_name}</div>
+                    </div>
+                    
+                    <div class="ticket-divider"></div>
+                    
+                    <div class="ticket-grid">
+                        <div class="ticket-label">Отправление:</div>
+                        <div class="ticket-value">
+                            ${ticket.departure_time}<br>
+                            ${ticket.departure_city_name}
+                        </div>
+                        
+                        <div class="ticket-label">Прибытие:</div>
+                        <div class="ticket-value">
+                            ${ticket.arrival_time}<br>
+                            ${ticket.arrival_city_name}
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-divider"></div>
+                    
+                    <div class="ticket-grid">
+                        <div class="ticket-label">Пассажир:</div>
+                        <div class="ticket-value">
+                            ${selectedPassenger.surname} ${selectedPassenger.name} ${selectedPassenger.midname || ''}<br>
+                            ${birthDate.toLocaleDateString('ru-RU')} г.р.
+                        </div>
+                    </div>
+                    
+                    ${selectedPassenger.passport ? `
+                    <div class="ticket-grid">
+                        <div class="ticket-label">Паспорт:</div>
+                        <div class="ticket-value">
+                            ${formatPassport(selectedPassenger.passport)}
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                ticketContent.innerHTML = html;
+            }
+            
+            // Функция форматирования паспорта
+            function formatPassport(passport) {
+                if (!passport) return '';
+                const str = passport.toString();
+                return str.length > 4 ? `${str.substring(0, 4)} ${str.substring(4)}` : str;
+            }
+            // Модальное окно о разработчиках
+        const modal = document.getElementById("developers-modal");
+        const btn1 = document.getElementById("about-developers");
+
+        btn1.onclick = function() {
+            modal.style.display = "block";
+        }
+            // Функция скачивания билета в PDF (как в ЛК)
+            function downloadTicket(ticketId) {
+                fetch(`http://localhost:8081/api/v1/ticket/get-ticket/${ticketId}/pdf`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/pdf'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                    		throw new Error(`Ошибка: ${text}`);
+                	});
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `билет_${ticketId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+            }
+            
+            // Функция отправки билета по email
+            function sendTicketByEmail(ticketId, login) {
+                fetch(`http://localhost:8081/api/v1/ticket/send-ticket/${ticketId}/${login}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                    		throw new Error(`Ошибка: ${text}`);
+                	});
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data === true) {
+                        console.log('Письмо с билетом успешно отправлено!');
+                    }
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+            }
+            
+            // Функция отмены бронирования (как в ЛК)
+            function cancelBooking(ticketId, login) {
+                fetch(`http://localhost:8081/api/v1/ticket/delete-ticket/${ticketId}/${login}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                    		throw new Error(`Ошибка: ${text}`);
+                	});
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data === true) {
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+            }
+            
+        });
+    </script>
+</body>
+</html>

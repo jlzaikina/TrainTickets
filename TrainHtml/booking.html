@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис бронирования билетов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Сервис бронирования билетов</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+                <a href="index.html" id="back-to-schedule">На главную</a>
+		<a href="personal-cabinet.html" id="personal-cabinet-link">Личный кабинет</a>
+                <button id="logout-btn" class="icon-button">
+    		   <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+<main>
+<!-- Блок с информаицей о месте-->
+    <div class="title">
+    <h1>Оформление заказа:</h1></div>
+            <div class="selection-info" id="selectionInfo">
+                <div class="info-box">
+                    <p>Вы выбрали  <span id="selected-seat-type"></span> место №<span id="selected-seat"></span> в вагоне №<span id="selected-van"></span>. Стоимость: <span id="selected-price"></span></p>
+                </div>
+            </div>
+
+<!-- Блок с информацией о поезде-->
+<div id="train-info-container">
+    <div class="train-info-header">
+        <div>
+            <span>Номер поезда:</span>
+            <span id="train-number"></span>
+        </div>
+        <div>
+            <span>Дата отправления:</span>
+            <span id="departure-time"></span>
+        </div>
+        <div>
+            <span>Дата прибытия:</span>
+            <span id="arrival-time"></span>
+        </div>
+        <div>
+            <span>Маршрут:</span>
+            <span id="route"></span>
+        </div>
+        <div>
+            <span>В пути:</span>
+            <span id="travel-duration"></span>
+        </div>
+        <div>
+            <span>Тип поезда:</span>
+            <span id="train-type"></span>
+        </div>
+    </div>
+</div>
+
+<div id ="action-pass" class="action-section">
+            <p><br><br>Выберите пассажира, на которого будет оформлен билет<p>
+            <button id="select-passenger-btn" class="action-button">Выбрать пассажира</button>
+    </div>
+
+<!-- Блок с выбранным пассажиром -->
+    <div id="selectedPassengerInfo" class="selected-passenger" style="display: none;">
+        <div id="selectedPassengerDetails"></div>
+	<div class="verify-notice">Внимательно проверьте данные</div>
+    </div>
+
+<div class="container-btn">
+	<button id="confirmBookingBtn" class="action-button" style="display: none;">Подтвердить бронирование</button>
+</div>
+
+<!-- Модальное окно выбора пассажира -->
+    <div id="passengerModal" class="passenger-modal">
+        <div class="passenger-modal-content">
+            <div id="passengerList" class="passenger-list">
+                <!-- Список пассажиров будет загружен динамически -->
+            </div>
+            
+            <div class="modal-actions">
+                <button id="addNewPassengerBtn" class="action-button">Добавить нового пассажира</button>
+                <button id="backFromPassengerModal" class="action-button">Назад</button>
+            </div>
+        </div>
+		</div>
+<!-- Форма добавления пассажира -->
+		<div id="add-passenger-form" class="modal">
+    		   <div class="modal-content">
+        		<span class="close">&times;</span>
+        		<h3>Новый пассажир</h3>
+                        <form id="passenger-form">
+                	    	<input type="text" id="surname-form" name="surname" placeholder="Фамилия" required>
+                		<input type="text" id="name-form" name="name" placeholder="Имя" required>
+                		<input type="text" id="midname-form" name="midname" placeholder="Отчество" required>
+                		<input type="date" id="date_birth-form" name="date_birth" required>
+                		<input type="text" id="passport-form" name="passport" placeholder="____ ______" required>  
+                		<input type="email" id="email-form" name="email" placeholder="Электронная почта" required>
+                		<label for="no-midname">
+                		    <input type="checkbox" id="no-midname"> нет отчества
+                		</label>
+                		<label for="is-child">
+                		   <input type="checkbox" id="is-child"> этот пассажир - ребенок
+                		</label>
+                		<div id="pass-error-message" class="error-message"></div>
+            			<button type="submit">Далее</button>
+        		</form>
+    		   </div>
+		</div>
+</main>
+
+    <footer class="fixed-footer">
+       <div class="footer-content">
+           <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+           <a href="#" id="about-developers">О разработчиках</a> |
+           <a href="#">О системе</a>
+           <div class="copyright">
+              Сервис бронирования железнодорожных билетов — Самара, 2025
+           </div>
+       </div>
+    </footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+	const passengerModal = document.getElementById('passengerModal');
+        const addPassengerForm = document.getElementById('add-passenger-form');
+        const passengerList = document.getElementById('passengerList');
+        const selectPassengerBtn = document.getElementById('select-passenger-btn');
+        const backFromPassengerModal = document.getElementById('backFromPassengerModal');
+        const addNewPassengerBtn = document.getElementById('addNewPassengerBtn');
+        const closeModalButtons = document.querySelectorAll('.close');
+        const selectedPassengerInfo = document.getElementById('selectedPassengerInfo');
+        const selectedPassengerDetails = document.getElementById('selectedPassengerDetails');
+        const inputPassport = document.getElementById('passport-form');         // Поле паспорт в форме добавления пасс
+        const noMiddleNameCheckbox = document.getElementById('no-midname');     // Чекбокс для отчества
+        const isChildCheckbox = document.getElementById('is-child');
+	const passengerForm = document.getElementById('passenger-form');
+	const passErrorMessage = document.getElementById('pass-error-message'); // Ошибки для формы добавления
+	const userLogin = localStorage.getItem('userLogin');
+	const closeButtons = document.querySelectorAll('.close');
+	const btn = document.getElementById("confirmBookingBtn");
+
+	btn.onclick = function(e) {
+        	e.preventDefault();
+ 		window.location.href = 'ticket.html';
+        }
+
+	closeButtons.forEach(button => {
+        	button.addEventListener('click', () => {
+            		modal.style.display = 'none';
+        	});
+    	});
+
+        // Загрузка данных о поезде
+        const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+        document.getElementById('selectionInfo').style.display = 'block'
+
+        // Заполнение информации о поезде
+        document.getElementById('train-number').textContent = selectedTrain.numberTrain;
+        document.getElementById('departure-time').textContent = selectedTrain.departureDate;
+        const originalDate = new Date(selectedTrain.departureDate);
+        const formattedOriginalDepartureTime = new Date(originalDate.getTime() - (originalDate.getTimezoneOffset() * 60000));
+        // Загрузка дополнительной информации о поезде
+        fetch('http://localhost:8081/api/v1/train/get-info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                number_train: selectedTrain.numberTrain,
+                dateDeparture: formattedOriginalDepartureTime.toISOString()
+            })
+        })
+        .then(response => response.json())
+        .then(trainInfo => {
+            document.getElementById('travel-duration').textContent = parseTravelDuration(trainInfo.travelDuration).toString();
+            document.getElementById('train-type').textContent = trainInfo.typeTrain;
+            document.getElementById('arrival-time').textContent = trainInfo.dateArrival;
+            document.getElementById('route').textContent = trainInfo.route;
+        });
+
+        // Заполнение информации о выбранном месте
+        const selectedSeat = JSON.parse(sessionStorage.getItem('selectedSeat'));
+        if (selectedSeat) {
+            document.getElementById('selected-van').textContent = selectedSeat.vanNumber;
+            document.getElementById('selected-seat').textContent = selectedSeat.seatNumber;
+            document.getElementById('selected-seat-type').textContent = selectedSeat.seatType;
+            document.getElementById('selected-price').textContent = `${selectedSeat.price} ₽`;
+	} else {
+    		console.error('Данные о месте не найдены');
+	}
+
+        // Обработчик кнопки выхода
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            const userGuid = localStorage.getItem('userGuid');
+
+            fetch('http://localhost:8081/api/v1/user/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ guid: userGuid })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка выхода');
+                }
+                return response.json();
+            })
+            .then(() => {
+                localStorage.removeItem('userLogin');
+                localStorage.removeItem('userGuid');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert(error.message);
+            });
+        });
+
+        // Модальное окно о разработчиках
+        const modal = document.getElementById("developers-modal");
+        const btn1 = document.getElementById("about-developers");
+        const span = document.getElementsByClassName("close")[0];
+
+        btn1.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+	// Обработчик кнопки "Выбрать пассажира"
+        selectPassengerBtn.addEventListener('click', () => {
+            loadPassengers();
+            passengerModal.style.display = 'block';
+        });
+
+        // Обработчик кнопки "Назад" в модальном окне
+        backFromPassengerModal.addEventListener('click', () => {
+            passengerModal.style.display = 'none';
+        });
+
+        // Обработчик кнопки "Добавить пассажира"
+        addNewPassengerBtn.addEventListener('click', () => {
+            passengerModal.style.display = 'none';
+            addPassengerForm.style.display = 'block';
+        });
+
+        // Закрытие модальных окон
+        closeModalButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                addPassengerForm.style.display = 'none';
+            });
+        });
+
+	// Загрузка списка пассажиров
+        async function loadPassengers() {
+            const userLogin = localStorage.getItem('userLogin');
+            try {
+                const response = await fetch(`http://localhost:8081/api/v1/pass/get-pass-book/${userLogin}`);
+                const passengers = await response.json();
+                
+                passengerList.innerHTML = '';
+                
+                if (passengers.length === 0) {
+                    passengerList.innerHTML = '<p>У вас нет сохраненных пассажиров.</p>';
+                    return;
+                }
+                
+                passengers.forEach(passenger => {
+                    const passengerItem = document.createElement('div');
+                    passengerItem.className = 'passenger-item';
+                    
+                    const passengerHeader = document.createElement('div');
+                    passengerHeader.className = 'passenger-header';
+                    passengerHeader.innerHTML = `
+                        <span>${passenger.surname} ${passenger.name} ${passenger.midname || ''}</span>
+                    `;
+                    
+                    const passengerDetails = document.createElement('div');
+                    passengerDetails.className = 'passenger-details';
+                    if (passenger.passport) {
+                        passengerDetails.innerHTML = `
+                            <p>Email: ${passenger.email || ''}</p>
+                            <p>Паспорт: ${passenger.passport || ''}</p>
+                            ${passenger.date_birth ? `<p>Дата рождения: ${new Date(passenger.date_birth).toLocaleDateString()}</p>` : ''}
+                        `;
+                    } else {
+                        passengerDetails.innerHTML = `
+                            <p>Дата рождения: ${new Date(passenger.date_birth).toLocaleDateString()}</p>
+                            <p><strong>Пассажир является ребенком</strong></p>
+                        `;
+                    }
+                    
+                    const passengerActions = document.createElement('div');
+                    passengerActions.className = 'passenger-actions';
+                    passengerActions.innerHTML = `
+                        <button class="toggle-details">Данные пассажира▼</button>
+                        <button class="select-passenger" data-id="${passenger.id_pass}">Выбрать</button>
+                    `;
+                    
+                    passengerHeader.appendChild(passengerActions);
+                    passengerItem.appendChild(passengerHeader);
+                    passengerItem.appendChild(passengerDetails);
+                    passengerList.appendChild(passengerItem);
+                    
+                    // Обработчик для кнопки "Подробности"
+                    const toggleBtn = passengerItem.querySelector('.toggle-details');
+                    toggleBtn.addEventListener('click', function() {
+                        const details = this.closest('.passenger-item').querySelector('.passenger-details');
+                        details.classList.toggle('active');
+                        this.textContent = details.classList.contains('active') ? 'Данные пассажира▲' : 'Данные пассажира▼';
+                    });
+                    
+                    // Обработчик для кнопки "Выбрать"
+                    const selectBtn = passengerItem.querySelector('.select-passenger');
+                    selectBtn.addEventListener('click', function() {
+                        const passengerId = this.getAttribute('data-id');
+                        selectPassenger(passengerId, passengers);
+                    });
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки пассажиров:', error);
+                passengerList.innerHTML = '<p>Не удалось загрузить список пассажиров.</p>';
+            }
+        }
+
+	// Выбор пассажира
+        async function selectPassenger(passengerId, passengers) {
+            const passenger = passengers.find(p => p.id_pass == passengerId);
+            if (!passenger) return;
+
+        // Проверяем, является ли пассажир текущим пользователем
+        const response = await fetch(`http://localhost:8081/api/v1/pass/is-self/${userLogin}/${passengerId}`);
+        const isSelf = await response.json();
+        
+        // Если это сам пользователь и нет паспорта или даты рождения
+        if (isSelf && (!passenger.passport || !passenger.date_birth)) {
+            if (!confirm('У вас не заполнены паспортные данные и/или дата рождения. Хотите заполнить их сейчас?')) {
+                return;
+            }
+            window.location.href = 'personal-cabinet.html';
+            return;
+        }
+            // Сохраняем выбранного пассажира
+            sessionStorage.setItem('selectedPassenger', JSON.stringify(passenger));
+            
+            // Отображаем информацию о выбранном пассажире
+           selectedPassengerDetails.innerHTML = `
+    <p><strong>${passenger.surname} ${passenger.name} ${passenger.midname || ''}</strong></p>
+    ${passenger.date_birth ? `<p>Дата рождения: ${new Date(passenger.date_birth).toLocaleDateString()}</p>` : ''}
+    ${passenger.passport ? `
+        <p>Паспорт: ${passenger.passport}</p>
+        ${passenger.email ? `<p>Email: ${passenger.email}</p>` : ''}
+    ` : '<p>Пассажир является ребенком</p>'}
+`;
+
+// Вспомогательные функции
+function isValidDate(dateString) {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) && dateString; // Проверяем что дата валидна и строка не пустая
+}
+            
+            selectedPassengerInfo.style.display = 'block';
+	    document.getElementById('action-pass').style.display = 'none';
+            document.getElementById('confirmBookingBtn').style.display = 'block';
+            passengerModal.style.display = 'none';
+        }
+
+    // Валидация паспорта в форме
+    inputPassport.addEventListener('input', function(event) {
+        const input = event.target;
+        const value = input.value.replace(/\D/g, ''); // Удаляем всё, кроме цифр
+        let formattedValue = '';
+
+        if (value.length > 0) {
+        formattedValue += value.substring(0, 4);
+
+            if (value.length > 4) {
+                formattedValue += ' ' + value.substring(4, 10);
+            } 
+        }
+
+        input.value = formattedValue;
+    });
+
+    // Обработчик события потери фокуса (если нужно добавить недостающие символы)
+    inputPassport.addEventListener('blur', function(event) {
+        const input = event.target;
+        const value = input.value.replace(/\D/g, '');
+
+        if (value.length > 0 && value.length < 10) {
+            let formattedValue = value.substring(0, 4);
+            if (value.length > 4) {
+                formattedValue += ' ' + value.substring(4, 10);
+            }
+            input.value = formattedValue;
+        }
+    });
+
+    // Обработчик изменения состояния чекбокса
+    noMiddleNameCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            console.log(document.getElementById('midname-form').value);
+            document.getElementById('midname-form').disabled = true; // Делаем поле неактивным
+            document.getElementById('midname-form').value = ''; // Очищаем поле
+        } else {
+            document.getElementById('midname-form').disabled = false; // Делаем поле активным
+        }
+    });
+
+    isChildCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            document.getElementById('passport-form').disabled = true; // Делаем поле неактивным
+            document.getElementById('passport-form').value = ''; // Очищаем поле
+	    document.getElementById('email-form').disabled = true; // Делаем поле неактивным
+            document.getElementById('email-form').value = ''; // Очищаем поле
+        } else {
+            document.getElementById('passport-form').disabled = false; // Делаем поле активным
+	    document.getElementById('email-form').disabled = false; // Делаем поле активным
+        }
+    });
+
+        <!-- Отправка формы пассажира-->
+        document.getElementById('passenger-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        passengerForm.querySelectorAll('input').forEach(input => input.classList.remove('error'));
+        passErrorMessage.textContent = '';
+        passErrorMessage.style.display = 'none';
+
+        const surname = document.getElementById('surname-form').value;
+        const name = document.getElementById('name-form').value;
+        const midname = noMiddleNameCheckbox.checked ? null : document.getElementById('midname-form').value;
+        const date_birth = document.getElementById('date_birth-form').value;
+        const passport = isChildCheckbox.checked ? null : document.getElementById('passport-form').value.replace(/\D/g, '');
+        const email = isChildCheckbox.checked ? null : document.getElementById('email-form').value;
+        console.log(surname);
+        const login = userLogin;
+        fetch(`http://localhost:8081/api/v1/pass/create/${login}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({date_birth, email, passport, surname, name, midname })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Ошибка: ${text}`);
+                });
+            }
+	    return response.json();
+        })
+        .then(data => {
+            addPassengerForm.style.display = 'none';
+            loadPassengers(); // Перезагружаем список пассажиров
+        })
+        .catch(error => {
+            if (error.message == 'Ошибка: Пассажир с таким паспортом уже существует' || error.message == 'Ошибка: Серия и номер паспорта 10-значное число')
+		document.getElementById('passport-form').classList.add('error');
+	    if (error.message == 'Ошибка: Email от 6 до 50 символов' || error.message == 'Ошибка: Пассажир с таким email уже существует')
+		document.getElementById('email-form').classList.add('error');
+ 	    if (error.message == 'Ошибка: Фамилия от 2 до 50 символов')
+		document.getElementById('surname-form').classList.add('error');
+	    if (error.message == 'Ошибка: Имя от 2 до 50 символов')
+		document.getElementById('name-form').classList.add('error');
+	    if (error.message == 'Ошибка: Проверьте дату рождения на корректность')
+		document.getElementById('date_birth-form').classList.add('error');
+            if (error.message == 'Ошибка: Отчество до 50 символов')
+		document.getElementById('midname-form').classList.add('error');
+            passErrorMessage.textContent = error.message;
+            passErrorMessage.style.display = 'block';
+        });
+    });
+    });
+
+<!-- Валидация времени путешествия-->
+    function parseTravelDuration(durationString) {
+        const hasDays = durationString.includes('.');
+        let days = 0;
+        let hours = 0;
+        let minutes = 0;
+        
+        if (hasDays) {
+            const [daysPart, timePart] = durationString.split('.');
+            days = parseInt(daysPart) || 0;
+            const [hoursStr, minutesStr] = timePart.split(':');
+            hours = parseInt(hoursStr) || 0;
+            minutes = parseInt(minutesStr) || 0;
+        } else {
+            const [hoursStr, minutesStr] = durationString.split(':');
+            hours = parseInt(hoursStr) || 0;
+            minutes = parseInt(minutesStr) || 0;
+        }
+        
+        return {
+            days,
+            hours,
+            minutes,
+            toString() {
+                let result = [];
+                if (this.days > 0) result.push(`${this.days} д`);
+                if (this.hours > 0) result.push(`${this.hours} ч`);
+                if (this.minutes > 0 || result.length === 0) result.push(`${this.minutes} мин`);
+                return result.join(' ');
+            }
+        };
+    }
+    </script>
+</body>
+</html>

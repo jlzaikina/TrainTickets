@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет администратора</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Личный кабинет</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+		<a href="index.html" id="back-to-schedule">На главную</a>  <!-- На главную -->
+                <button id="logout-btn" class="icon-button"> <!-- Выход -->
+    		    <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <div class="personal-cabinet-container">
+            <!-- Меню личного кабинета (слева) -->
+            <nav class="admin-cabinet-menu">
+                <ul>
+                    <li><a href="#" id="schedule-link" class="active">Расписание</a></li>
+                    <li><a href="#" id="vans-link">Вагоны</a></li>
+                    <li><a href="#" id="trains-link">Поезда</a></li>
+                </ul>
+            </nav>
+
+            <!-- Контент личного кабинета (справа) -->
+
+            <div class="personal-cabinet-content">
+
+                <!-- Раздел "Мои данные" -->
+
+                <div id="schedule" class="content-section active">
+                    
+                </div>
+
+                <!-- Раздел "Пассажиры" -->
+		<div id="vans" class="content-section">
+    		 <div id="statusMessage" class="status-message" style="display: none;"></div>
+                
+                <!-- Список схем -->
+                <div class="schema-list" id="schemaList">
+                    <!-- Схемы будут загружены здесь -->
+                </div>
+                
+                <!-- Конструктор вагонов (скрыт по умолчанию) -->
+                <div id="van-constructor" style="display: none;">
+                    <h2 id="constructor-title">Создание вагона</h2>
+                    
+                    <div class="van-type-selector">
+                        <select id="vanType">
+                            <option value="">-- Выберите тип --</option>
+                            <option value="Купе">Купе</option>
+                            <option value="СВ">СВ</option>
+                            <option value="Плацкарт">Плацкарт</option>
+                            <option value="Сидячий">Сидячий</option>
+                        </select>
+                    </div>
+                    
+                    <div id="controls-container" class="controls" style="display:none;">
+                        <div id="coupe-controls" style="display:none;">
+                            <button id="addCompartment4">Добавить купе (4 места)</button>
+                            <button id="addCompartment2">Добавить купе (2 места)</button>
+                            <p id="compartmentCounter">Добавлено купе: 0/9</p>
+                        </div>
+                        
+                        <div id="sv-controls" style="display:none;">
+                            <button id="addSVCompartment">Добавить купе (2 места)</button>
+                            <p id="svCompartmentCounter">Добавлено купе: 0/9</p>
+                        </div>
+                        
+                        <div id="platskart-controls" style="display:none;">
+                            <button id="addPlatskartCompartment4">Добавить купе (4 места)</button>
+                            <button id="addPlatskartCompartment2">Добавить купе (2 места)</button>
+                            <button id="addPlatskartSideSeats">Добавить боковые места (2 места)</button>
+                            <p id="platskartCompartmentCounter">Добавлено купе: 0/9</p>
+                            <p id="sideSeatsCounter">Добавлено боковых мест: 0 (блоков: 0/9)</p>
+                        </div>
+                        
+                        <div id="sitting-controls" style="display:none;">
+                            <button id="addSittingRow">Добавить ряд (2 слева + 2 справа)</button>
+                        </div>
+                    </div>
+                    
+                    <div id="schema-name-input" class="schema-name-input">
+                        <label for="schemaName">Название схемы:</label>
+                        <input type="text" id="schemaName" placeholder="Например: Стандартный вагон-купе">
+                    </div>
+                    
+                    <h3>Визуальный предпросмотр</h3>
+                    <div id="visualPreview" class="visual-preview">
+                        <p>Выберите тип вагона и добавьте элементы</p>
+                    </div>
+                    
+                    <div id="constructor-status" class="status-message"></div>
+                    
+                    <div class="form-actions">
+                        <button id="saveSchema" style="padding: 8px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;background-color: #777; color: white; display:none; max-width: 200px;">Сохранить схему</button>
+                        <button id="cancelConstructor" style="background-color: #f44336;padding: 8px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; color: white; max-width: 200px;">Отмена</button>
+                    </div>
+                </div>
+                
+                <button id="addSchemaBtn" class="add-btn">Добавить новую схему</button>
+            </div>
+
+                <!-- Раздел "Билеты" -->
+
+                <div id="trains" class="content-section">
+    <div id="statusMessage" class="status-message" style="display: none;"></div>
+    
+    <!-- Список поездов -->
+    <div class="trains-list" id="trainsList">
+        <!-- Поезда будут загружены здесь -->
+    </div>
+    
+    <!-- Форма добавления/редактирования поезда -->
+    <div id="train-form-container" style="display: none;">
+        <h2 id="train-form-title">Добавление поезда</h2>
+        
+        <div class="form-group">
+            <label>Количество вагонов:</label>
+            <div class="input-with-button">
+                <input type="number" id="vanCount" min="2" max="24" value="1">
+                <button id="generateVansBtn">Задать</button>
+            </div>
+        </div>
+        
+        <div id="vans-container">
+            <!-- Вагоны будут добавляться здесь -->
+        </div>
+        
+        <div id="train-save-section" style="display: none;">
+            <div class="form-group">
+                <label>Задать номер для сохранения:</label>
+                <input type="number" min="1" id="trainNumber" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Задать тип для сохранения:</label>
+                <select id="trainType" required>
+            		<option value="">Загрузка типов...</option>
+        	</select>
+            </div>
+            <div class="form-group">
+        	<label for="trainName">Название поезда (необязательно):</label>
+        	<input type="text" id="trainName" name="trainName" placeholder="Например, 'Жигули'">
+    	    </div>
+            <div class="form-actions">
+                <button id="saveTrainBtn">Сохранить поезд</button>
+            </div>
+        </div>
+        
+        <button id="cancelTrainBtn">Отмена</button>
+    </div>
+    
+    <button id="addTrainBtn" class="add-btn">Добавить новый поезд</button>
+</div>
+		    
+        	</div>
+        </div>
+    </main>
+
+
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+
+
+
+
+    <script src="personal-cabinet-admin.js"></script>
+</body>
+</html>
