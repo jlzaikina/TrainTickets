@@ -14,6 +14,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{B155
 		SqlQuery_1.sql = SqlQuery_1.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "html", "html", "{60044E8B-D951-4D7D-ABDE-256864688789}"
+	ProjectSection(SolutionItems) = preProject
+		..\train ticket html\booking.html = ..\train ticket html\booking.html
+		..\train ticket html\index.html = ..\train ticket html\index.html
+		..\train ticket html\logout.png = ..\train ticket html\logout.png
+		..\train ticket html\personal-cabinet-admin.html = ..\train ticket html\personal-cabinet-admin.html
+		..\train ticket html\personal-cabinet-admin.js = ..\train ticket html\personal-cabinet-admin.js
+		..\train ticket html\personal-cabinet.html = ..\train ticket html\personal-cabinet.html
+		..\train ticket html\personal-cabinet.js = ..\train ticket html\personal-cabinet.js
+		..\train ticket html\script.js = ..\train ticket html\script.js
+		..\train ticket html\styles.css = ..\train ticket html\styles.css
+		..\train ticket html\ticket.html = ..\train ticket html\ticket.html
+		..\train ticket html\train-info.html = ..\train ticket html\train-info.html
+		..\train ticket html\train.jpg = ..\train ticket html\train.jpg
+		..\train ticket html\van-info.html = ..\train ticket html\van-info.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
