@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор места в вагоне</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Сервис бронирования билетов</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+                <a href="index.html" id="back-to-schedule">На главную</a>
+                <a href="personal-cabinet.html" id="personal-cabinet-link">Личный кабинет</a>
+                <button id="logout-btn" class="icon-button">
+                   <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+<main>
+
+    <div class="container">
+        <h1>Выберите вагон и место:</h1>
+        <div class="carriage-tabs" id="carriageTabs">
+            <!-- Тут будут вкладки вагонов -->
+        </div>
+        
+        <!-- Вкладки вагонов -->
+        <div class="carriage-tabs-container">
+    <div class="carriage-tabs" id="carriageTabs"></div>
+    </div>
+        <!-- Схема вагона -->
+        <div class="carriage-schema" id="carriageSchema">
+            <div class="loading">Загрузка схемы вагона...</div>
+        </div>
+<div class="container-btn">
+        <button class="action-button" id="bookButton">Перейти к оформлению</button></div>
+    </div>
+</main>
+
+<!-- Подвал-->
+<footer class="fixed-footer">
+       <div class="footer-content">
+           <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+           <a href="#" id="about-developers">О разработчиках</a> |
+           <a href="#">О системе</a>
+           <div class="copyright">
+              Сервис бронирования железнодорожных билетов — Самара, 2025
+           </div>
+       </div>
+    </footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+    <script>
+
+    document.addEventListener('DOMContentLoaded', async () => {
+    const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+    const selectedCarriages = JSON.parse(localStorage.getItem('selectedCarriages'));
+    const selectedCarriageType = localStorage.getItem('selectedCarriageType');
+    const modal = document.getElementById("developers-modal");
+    const btn = document.getElementById("about-developers");
+    const closeButtons = document.querySelectorAll('.close');
+
+    // Инициализируем вкладки вагонов
+    initCarriageTabs(selectedCarriages);
+    
+    // Загружаем схему первого вагона по умолчанию
+    if (selectedCarriages.length > 0) {
+        await selectCarriage(selectedCarriages[0]);
+    }
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    });
+    btn.onclick = function(e) {
+        e.preventDefault();
+        modal.style.display = "block";
+    }
+
+    // Настройка обработчиков событий
+    document.getElementById('bookButton').addEventListener('click', handleBooking);
+    });
+
+function initCarriageTabs(carriageNumbers) {
+    const tabsContainer = document.getElementById('carriageTabs');
+    tabsContainer.innerHTML = '';
+    
+    carriageNumbers.forEach((number, index) => {
+        const tab = document.createElement('div');
+        tab.className = `carriage-tab ${index === 0 ? 'active' : ''}`;
+        tab.textContent = `Вагон ${number}`;
+        tab.dataset.carriageNumber = number;
+        
+        tab.addEventListener('click', async () => {
+            // Прокрутка к началу схемы при переключении
+            document.querySelector('.carriage-schema-container')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            const vanNumber = tab.dataset.carriageNumber;
+            await selectCarriage(vanNumber);
+            
+            // Обновляем активную вкладку
+            document.querySelectorAll('.carriage-tab').forEach(t => 
+                t.classList.remove('active')
+            );
+            tab.classList.add('active');
+        });
+        
+        tabsContainer.appendChild(tab);
+    });
+}
+
+async function selectCarriage(carriageNumber) {
+    try {
+        const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+        
+        // Показываем загрузку
+        document.getElementById('carriageSchema').innerHTML = 
+            '<div class="loading">Загрузка схемы вагона...</div>';
+         const vanInfoElement = document.getElementById('selected-van');
+    if (vanInfoElement) {
+        vanInfoElement.textContent = carriageNumber;
+    }
+        // Загружаем схему вагона с сервера
+        const response = await fetch('http://localhost:8081/api/v1/train/get-shema', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                number_train: selectedTrain.numberTrain,
+                number_van: carriageNumber
+            })
+        });
+        
+        if (!response.ok) throw new Error('Ошибка загрузки схемы вагона');
+        
+        const vanData = await response.json();
+        renderCarriageSchema(carriageNumber, vanData, localStorage.getItem('selectedCarriageType'));
+        setupSeatSelection(carriageNumber, localStorage.getItem('selectedCarriageType'));
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        document.getElementById('carriageSchema').innerHTML = 
+            '<div class="error">Ошибка загрузки схемы вагона</div>';
+    }
+}
+
+function renderCarriageSchema(vanNumber, schemaData, carriageType) {
+    if (carriageType === 'Сидячий') {
+        return renderSittingCarriageSchema(vanNumber, schemaData, carriageType);
+    } else {
+        return renderStandardCarriageSchema(vanNumber, schemaData, carriageType);
+    }
+}
+
+<!-- Отрисовка сидячего вагона-->
+function renderSittingCarriageSchema(vanNumber, schemaData, carriageType) {
+    const schema = JSON.parse(schemaData.carriageSchemaJson);
+    const occupiedSeats = schemaData.occupiedSeatNumbers || [];
+    
+    let html = `
+        <h3>${schema.schemaName}</h3>
+        <div class="sitting-carriage-container">
+            <div class="sitting-carriage-body">
+    `;
+    // Служебная зона (туалет) слева
+    html += `
+        <div class="service-area toilet">
+            <div class="service-icon"></div>
+            <span>Туалет</span>
+        </div>
+    `;
+    // Отрисовка рядов
+    schema.rows.forEach(row => {
+        html += `<div class="seat-row">`;
+        
+        // Левая сторона (места 1-2, 5-6 и т.д.)
+        html += `<div class="seat-group left-seats">`;
+        row.leftSeats.forEach(seatNum => {
+            const isOccupied = occupiedSeats.includes(seatNum);
+            html += `
+                <div class="seat ${isOccupied ? 'occupied' : 'available'}" 
+                     data-seat="${seatNum}" data-position="left">
+                     ${seatNum}
+                </div>
+            `;
+        });
+        html += `</div>`;
+        
+        
+        // Правая сторона (места 3-4, 7-8 и т.д.)
+        html += `<div class="seat-group right-seats">`;
+        row.rightSeats.forEach(seatNum => {
+            const isOccupied = occupiedSeats.includes(seatNum);
+            html += `
+                <div class="seat ${isOccupied ? 'occupied' : 'available'}" 
+                     data-seat="${seatNum}" data-position="right">
+                     ${seatNum}
+                </div>
+            `;
+        });
+        html += `</div>`;
+        
+        html += `</div>`; // закрываем seat-row
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+
+    // Добавляем легенду и информацию
+    html += createLegend(carriageType);
+    html += `
+        <div class="selection-info" id="selectionInfo">
+            <div class="info-box">
+                <p>Вы выбрали <span id="selected-type">-</span> место №<span id="selected-seat">-</span> в вагоне №<span id="selected-van">${vanNumber}</span> Стоимость: <span id="selected-price">-</span></p>
+            </div> 
+        </div>
+    `;
+    
+    document.getElementById('carriageSchema').innerHTML = html;
+}
+
+<!-- Отрисовка купе и плацкарта-->
+function renderStandardCarriageSchema(vanNumber, schemaData, carriageType) {
+    const schema = JSON.parse(schemaData.carriageSchemaJson);
+    const occupiedSeats = schemaData.occupiedSeatNumbers || [];
+    
+    let html = `
+        <h3>${schema.schemaName}</h3>
+        <div class="carriage-container">
+    `;
+    
+    // Отрисовка вагона горизонтально
+    html += `<div class="carriage-body">`;
+    
+    // Служебная зона (туалет) слева
+    html += `
+        <div class="service-area toilet">
+            <div class="service-icon"></div>
+            <span>Туалет</span>
+        </div>
+    `;
+    
+    // Купе в ряд
+    html += `<div class="compartments-row">`;
+    schema.compartments.forEach(compartment => {
+        const seats = compartment.seats;
+        html += `
+            <div class="compartment-horizontal">
+                <div class="seats-horizontal">
+        `;
+        
+        // Определяем тип мест в зависимости от количества мест в купе
+        if (seats.length === 4) {
+            const seats = [...compartment.seats].sort((a, b) => a % 2 - b % 2 || a - b);
+        
+            seats.forEach(seatNum => {
+                const isOccupied = occupiedSeats.includes(seatNum);
+                const isUpper = seatNum % 2 === 0;
+                const seatClass = isOccupied ? 'occupied' : 
+                                (isUpper ? 'available upper' : 'available');
+                const seatType = isUpper ? 'upper' : 'lower';
+                
+                html += `
+                    <div class="seat ${seatClass}" 
+                         data-seat="${seatNum}"
+                         data-type="${seatType}" data-position="compartment">
+                        ${seatNum}
+                    </div>
+                `;
+            });
+        } 
+        else if (seats.length === 2) {
+            // 2 места в купе (оба нижние)
+            seats.forEach(seatNum => {
+                const isOccupied = occupiedSeats.includes(seatNum);
+                const seatClass = isOccupied ? 'occupied' : 'available';
+                
+                html += `<div class="seat ${seatClass}" 
+                         data-seat="${seatNum}" data-type="lower" data-position="compartment">
+                         ${seatNum}</div>`;
+            });
+        }
+        html += `</div></div>`;
+ 
+    });
+    html += `</div>`; // закрываем compartments-row
+    
+    // Служебная зона (проводник) справа
+    html += `
+        <div class="service-area conductor">
+            <div class="service-icon"></div>
+            <span>Проводник</span>
+        </div>
+    `;
+    
+    html += `</div>`; // закрываем carriage-body и carriage-container
+
+    if (carriageType === 'Плацкарт') {
+        html += `
+        <div class="side-seats-container">
+            <div class="side-seats-pairs">
+        `;
+
+        // Сортируем боковые места по убыванию (справа налево)
+        const sortedSideSeats = [...schema.sideSeats].sort((a, b) => b - a);
+        
+        // Группируем по 2 места
+        for (let i = 0; i < sortedSideSeats.length; i += 2) {
+            const upperSeat = sortedSideSeats[i];
+            const lowerSeat = sortedSideSeats[i+1];
+            
+            html += `<div class="side-seat-pair">`;
+            
+            // Верхнее место
+            if (upperSeat) {
+                const isOccupied = occupiedSeats.includes(upperSeat);
+                html += `
+                    <div class="seat ${isOccupied ? 'occupied' : 'available upper'}" 
+                         data-seat="${upperSeat}" data-type="upper" data-position="side">
+                         ${upperSeat}
+                    </div>
+                `;
+            }
+            
+            // Нижнее место
+            if (lowerSeat) {
+                const isOccupied = occupiedSeats.includes(lowerSeat);
+                html += `
+                    <div class="seat ${isOccupied ? 'occupied' : 'available'}" 
+                         data-seat="${lowerSeat}" data-type="lower" data-position="side">
+                         ${lowerSeat}
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+        }
+        
+        html += `
+            </div>
+        </div>
+        `;
+     }
+     html += `</div>`;
+     html += createLegend(carriageType);
+
+     html = `
+        <div class="carriage-schema-container">
+            ${html}
+        </div>
+    `;
+    // Добавляем блок информации о выбранном месте
+    html += `
+        <div class="selection-info" id="selectionInfo">
+            <div class="info-box">
+                <p>Вы выбрали <span id="selected-type">-</span> место №<span id="selected-seat">-</span> в вагоне №<span id="selected-van">${vanNumber}</span> Стоимость: <span id="selected-price">-</span></p>
+            </div> 
+        </div>
+    `;
+    
+    document.getElementById('carriageSchema').innerHTML = html;
+}
+
+<!-- Создание легенды-->
+function createLegend(carriageType) {
+    let legendHTML = `
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color available"></div>
+            <span>Свободное место</span>
+        </div>`;
+    
+    if (carriageType === 'Купе' || carriageType === 'Плацкарт') {
+        legendHTML += `
+        <div class="legend-item">
+            <div class="legend-color available upper"></div>
+            <span>Верхнее место</span>
+        </div>`;
+    }
+    
+    legendHTML += `
+        <div class="legend-item">
+            <div class="legend-color selected"></div>
+            <span>Выбранное место</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color occupied"></div>
+            <span>Забронированное места</span>
+        </div>
+    </div>`;
+    
+    return legendHTML;
+}
+
+<!-- Выбор места-->
+async function setupSeatSelection(vanNumber, carriageType) {
+    let selectedSeat = null;
+    
+    document.addEventListener('click', async function(e) {
+        const seat = e.target.closest('.seat');
+        
+        // Можно выбирать только доступные места (не занятые)
+        if (seat && seat.classList.contains('available')) {
+            // Снимаем выделение с предыдущего выбранного места
+            if (selectedSeat) {
+                selectedSeat.classList.remove('selected');
+            }
+            
+            // Выделяем новое выбранное место
+            seat.classList.add('selected');
+            selectedSeat = seat;
+            const activeTab = document.querySelector('.carriage-tab.active');
+            const currentVanNumber = activeTab ? activeTab.dataset.carriageNumber : vanNumber;
+            // Определяем тип места и расположение
+            let seatType;
+            if (carriageType === 'Сидячий') {
+                seatType = 'сидячее';
+            } else {
+                seatType = seat.dataset.type === 'upper' ? 'верхнее' : 'нижнее';
+            }
+
+            // Специальная обработка для боковых мест
+            let typeDisplay;
+            if (carriageType === 'СВ') {
+                typeDisplay = 'нижнее';
+            } else if (seat.dataset.position === 'side') {
+                typeDisplay = `${seatType} боковое`;
+            } else if (carriageType === 'Сидячий') {
+                typeDisplay = 'сидячее';
+            } else {
+                typeDisplay = seatType;
+            }
+            
+            const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+            const price = await fetchSeatPrice(selectedTrain.numberTrain, selectedTrain.departureDate, typeDisplay, carriageType);
+            
+            // Обновляем информацию о выборе
+            document.getElementById('selected-type').textContent = typeDisplay;
+            document.getElementById('selected-seat').textContent = seat.dataset.seat;
+            document.getElementById('selected-van').textContent = currentVanNumber;
+            document.getElementById('selected-price').textContent = `${price} ₽`;
+            
+            // Показываем блок информации
+            document.getElementById('selectionInfo').style.display = 'block';
+            
+            // Сохраняем выбранное место
+            localStorage.setItem('selectedSeat', JSON.stringify({
+                vanNumber: currentVanNumber,
+                seatNumber: seat.dataset.seat,
+                seatType: typeDisplay,
+                carriageType: carriageType,
+                price: price
+            }));
+        } else if (selectedSeat) {
+            // Клик по занятому месту или не по месту
+            selectedSeat.classList.remove('selected');
+            selectedSeat = null;
+            localStorage.removeItem('selectedSeat');
+            document.getElementById('selectionInfo').style.display = 'none';
+        }
+    });
+}
+
+function handleBooking() {
+    const selectedSeat = JSON.parse(localStorage.getItem('selectedSeat'));
+    
+    if (!selectedSeat) {
+        alert('Выберите место!');
+        return;
+    }
+
+    sessionStorage.setItem('selectedSeat', JSON.stringify(selectedSeat));
+    
+    // Переходим на страницу оформления
+    window.location.href = 'booking.html';
+}
+
+<!-- Получение стоимости-->
+async function fetchSeatPrice(trainNumber, departureDate, seatType, trainType) {
+    const originalDate = new Date(departureDate);
+    const formattedOriginalDepartureTime = new Date(originalDate.getTime() - (originalDate.getTimezoneOffset() * 60000));
+    try {
+        const response = await fetch('http://localhost:8081/api/v1/train/get-price', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                number_train: trainNumber,
+                dateDeparture: formattedOriginalDepartureTime.toISOString(),
+                type_van: trainType,
+                type_seat: seatType
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка сервера');
+        }
+        
+        const data = await response.json();
+        return data.price || data; // Возвращаем цену
+    } catch (error) {
+        console.error('Ошибка при получении цены:', error);
+        return 'неизвестна';
+    }
+}
+</script>
+</body>
+</html>

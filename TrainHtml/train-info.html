@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис бронирования билетов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Сервис бронирования билетов</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+                <a href="index.html" id="back-to-schedule">На главную</a>
+		<a href="personal-cabinet.html" id="personal-cabinet-link">Личный кабинет</a>
+                <button id="logout-btn" class="icon-button">
+    		   <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+<main>
+<!-- Блок информации-->
+<div id="train-info-container">
+    <h1>О поезде</h1>
+    
+    <div class="train-info-header">
+        <div>
+            <span>Номер поезда:</span>
+            <span id="train-number"></span>
+        </div>
+        <div>
+            <span>Дата отправления:</span>
+            <span id="departure-time"></span>
+        </div>
+        <div>
+            <span>Дата прибытия:</span>
+            <span id="arrival-time"></span>
+        </div>
+        <div>
+            <span>Маршрут:</span>
+            <span id="route"></span>
+        </div>
+        <div>
+            <span>В пути:</span>
+            <span id="travel-duration"></span>
+        </div>
+        <div>
+            <span>Тип поезда:</span>
+            <span id="train-type"></span>
+        </div>
+    </div>
+
+	<!-- Блок вагонов-->
+    <h2>Выберите тип вагона:</h2>
+    <div id="carriage-types-container"></div>
+</div>
+</main>
+
+<!-- Подвал-->
+    <footer class="fixed-footer">
+       <div class="footer-content">
+           <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+           <a href="#" id="about-developers">О разработчиках</a> |
+           <a href="#">О системе</a>
+           <div class="copyright">
+              Сервис бронирования железнодорожных билетов — Самара, 2025
+           </div>
+       </div>
+    </footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const selectedTrain = JSON.parse(sessionStorage.getItem('selectedTrain'));
+    const logoutBtn = document.getElementById('logout-btn');
+    const modal = document.getElementById("developers-modal");
+    const btn = document.getElementById("about-developers");
+    const closeButtons = document.querySelectorAll('.close');
+    localStorage.removeItem('selectedSeat')
+    localStorage.removeItem('selectedCarriageType')
+    localStorage.removeItem('selectedCarriages')
+
+    if (!selectedTrain) {
+        window.location.href = 'index.html';
+        return;
+    }
+	
+    <!-- Закрытие окон-->
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    });
+
+    <!-- Форма о разработчиках-->
+    btn.onclick = function(e) {
+        e.preventDefault();
+        modal.style.display = "block";
+    }
+
+    // Заполняем основную информацию
+    document.getElementById('train-number').textContent = selectedTrain.numberTrain;
+    const originalDate = new Date(selectedTrain.departureDate);
+    const formattedOriginalDepartureTime = new Date(originalDate.getTime() - (originalDate.getTimezoneOffset() * 60000));
+    
+    const response = await fetch('http://localhost:8081/api/v1/train/get-info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            number_train: selectedTrain.numberTrain,
+            dateDeparture: formattedOriginalDepartureTime.toISOString()
+        })
+    });
+    
+    const trainInfo = await response.json();
+    
+    document.getElementById('travel-duration').textContent = parseTravelDuration(trainInfo.travelDuration);
+    document.getElementById('train-type').textContent = trainInfo.trainType;
+    document.getElementById('arrival-time').textContent = trainInfo.dateArrival;
+    document.getElementById('route').textContent = trainInfo.route;
+    document.getElementById('train-type').textContent = trainInfo.typeTrain;
+    document.getElementById('departure-time').textContent = trainInfo.dateDeparture;
+    
+
+    // Создаем блоки с типами вагонов
+    const carriageTypesContainer = document.getElementById('carriage-types-container');
+    
+    for (const [type, numbers] of Object.entries(trainInfo.vanByType)) {
+        const typeBlock = document.createElement('div');
+        typeBlock.className = 'carriage-type';
+        
+        typeBlock.innerHTML = `
+	<div class="carriage-type-info">
+            <h3>${type}</h3>
+            <p><strong>Вагоны:</strong> ${numbers.join(', ')}</p>
+            <button class="select-carriage" data-type="${type}">Выбрать</button>
+	</div>
+        <p class="carriage-description">${getCarriageDescription(type)}</p>
+        `;
+        
+        carriageTypesContainer.appendChild(typeBlock);
+    }
+
+    <!-- Обработка выбора-->
+    document.querySelectorAll('.select-carriage').forEach(button => {
+        button.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const carriages = trainInfo.vanByType[type];
+            
+            // Сохраняем выбранные вагоны в localStorage
+            localStorage.setItem('selectedCarriages', JSON.stringify(carriages));
+            localStorage.setItem('selectedCarriageType', type);
+            
+            // Переходим на страницу выбора мест
+            window.location.href = 'van-info.html';
+        });
+    });
+
+<!-- Описания-->
+function getCarriageDescription(type) {
+    const descriptions = {
+        'Плацкарт': 'Спальный вагон с общим пространством, 54 места',
+        'Купе': 'Вагон с закрытыми купе, 36 мест (9 купе)',
+        'Сидячий': 'Вагон с сидячими местами'
+    };
+    return descriptions[type] || 'Описание отсутствует';
+}
+
+<!-- Выход-->
+logoutBtn.addEventListener('click', function() {
+        const userGuid = localStorage.getItem('userGuid');
+
+        fetch('http://localhost:8081/api/v1/user/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ guid: userGuid }) // Используем сохраненный GUID
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Ошибка: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Удаляем данные из localStorage
+            localStorage.removeItem('userLogin');
+            localStorage.removeItem('userGuid');
+
+            window.location.href = 'index.html';
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert(error.message);
+        });
+    });
+
+<!-- Валидация времени путешествия-->
+function parseTravelDuration(durationString) {
+    // Проверяем наличие дней (формат "d.HH:mm:ss" или "d.HH:mm")
+    const hasDays = durationString.includes('.');
+    
+    let days = 0;
+    let hours = 0;
+    let minutes = 0;
+    
+    if (hasDays) {
+        // Разделяем на дни и остальное время
+        const [daysPart, timePart] = durationString.split('.');
+        days = parseInt(daysPart) || 0;
+        
+        // Разбираем часть с часами и минутами
+        const [hoursStr, minutesStr] = timePart.split(':');
+        hours = parseInt(hoursStr) || 0;
+        minutes = parseInt(minutesStr) || 0;
+    } else {
+        // Формат без дней ("HH:mm" или "HH:mm:ss")
+        const [hoursStr, minutesStr] = durationString.split(':');
+        hours = parseInt(hoursStr) || 0;
+        minutes = parseInt(minutesStr) || 0;
+    }
+    
+    return {
+        days,
+        hours,
+        minutes,
+        toString() {
+            let result = [];
+            if (this.days > 0) result.push(`${this.days} д`);
+            if (this.hours > 0) result.push(`${this.hours} часов`);
+            if (this.minutes > 0 || result.length === 0) result.push(`${this.minutes} минут`);
+            return result.join(' ');
+        }
+    };
+}
+});
+</script>
+
+</body>
+</html>

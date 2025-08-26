@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Личный кабинет</h1>
+        <div id="auth-buttons">
+            <span id="user-info">
+                <span id="username"></span>
+		<a href="index.html" id="back-to-schedule">На главную</a>  <!-- На главную -->
+                <button id="logout-btn" class="icon-button"> <!-- Выход -->
+    		    <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <div class="personal-cabinet-container">
+            <!-- Меню личного кабинета (слева) -->
+            <nav class="personal-cabinet-menu">
+                <ul>
+                    <li><a href="#" id="my-data-link" class="active">Мои данные</a></li>
+                    <li><a href="#" id="passengers-link">Пассажиры</a></li>
+                    <li><a href="#" id="bookings-section-link">Мои брони</a></li>
+                </ul>
+            </nav>
+
+            <!-- Контент личного кабинета (справа) -->
+
+            <div class="personal-cabinet-content">
+
+                <!-- Раздел "Мои данные" -->
+
+                <div id="my-data" class="content-section active">
+                    <div class="data-container">
+                        <div class="fio-container">     
+                            <div class="fio-group">
+                                <label for="surname">ФИО:</label>
+                                <input type="text" id="surname" name="surname" disabled class="underline-input">
+                            </div>
+                            <div class="fio-group">
+                                <label for="name"></label>
+                                <input type="text" id="name" name="name" disabled class="underline-input">
+                            </div>
+                            <div class="fio-group">
+                                <label for="patronymic"></label>
+                                <input type="text" id="patronymic" name="patronymic" disabled class="underline-input">
+                            </div>
+			<span class="clickable-text" id="edit-fio-text">Изменить</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" disabled class="underline-input">
+                            <span class="clickable-text" data-field="email">Изменить</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="phone">Телефон:</label>
+                            <input type="text" id="phone" name="phone" disabled class="underline-input">
+                            <span class="clickable-text" data-field="phone">Изменить</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="birthdate">Дата рождения:</label>
+                            <input type="date" id="birthdate" name="birthdate" disabled class="underline-input">
+                            <span class="clickable-text" data-field="birthdate">Добавить</span>
+                        </div>
+                        <div class="input-group">
+                            <label for="passport">Паспортные данные:</label>
+                            <input type="text" id="passport" name="passport" disabled class="underline-input">
+                            <span class="clickable-text" data-field="passport">Добавить</span>
+                        </div>
+                    </div>
+
+                    <!-- Плашка с предупреждением -->
+                    <div id="warning-message" class="warning-message">
+                        Внесите дату рождения и паспортные данные - без этого забронировать билет не получится.
+                    </div>
+                </div>
+
+                <!-- Раздел "Пассажиры" -->
+		<div id="passengers" class="content-section">
+    		    <div class="passengers-container">
+        		<div id="passengers-list"></div>
+                        <button id="add-passenger-btn">Добавить нового пассажира</button>
+                    </div>
+                </div>
+
+		<!-- Форма добавления пассажира -->
+	
+		<div id="add-passenger-form" class="modal">
+    		   <div class="modal-content">
+        		<span class="close">&times;</span>
+        		<h3>Новый пассажир</h3>
+                        <form id="passenger-form">
+                	    	<input type="text" id="surname-form" name="surname" placeholder="Фамилия" required>
+                		<input type="text" id="name-form" name="name" placeholder="Имя" required>
+                		<input type="text" id="midname-form" name="midname" placeholder="Отчество" required>
+                		<input type="date" id="date_birth-form" name="date_birth" required>
+                		<input type="text" id="passport-form" name="passport" placeholder="____ ______" required>  
+                		<input type="email" id="email-form" name="email" placeholder="Электронная почта" required>
+                		<label for="no-midname">
+                		    <input type="checkbox" id="no-midname"> нет отчества
+                		</label>
+                		<label for="is-child">
+                		   <input type="checkbox" id="is-child"> этот пассажир - ребенок
+                		</label>
+                		<div id="pass-error-message" class="error-message"></div>
+            			<button type="submit">Далее</button>
+        		</form>
+    		   </div>
+		</div>
+
+                <!-- Раздел "Билеты" -->
+
+                <div id="bookings-section" class="content-section">
+		    <div class="bookings-container">
+            		<div id="bookings-list">
+                		<div class="loading">Загрузка данных...</div>
+            		</div>
+        	</div>
+        </div>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="fixed-footer">
+    <div class="footer-content">
+        <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+        <a href="#" id="about-developers">О разработчиках</a> |
+        <a href="#">О системе</a>
+        <div class="copyright">
+            Сервис бронирования железнодорожных билетов — Самара, 2025
+        </div>
+    </div>
+</footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+
+
+
+
+    <script src="personal-cabinet.js"></script>
+</body>
+</html>

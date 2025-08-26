@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис бронирования билетов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<!-- Фоновое изображение -->
+        <div id="background-image">
+            <img src="train.jpg" alt="Фоновое изображение">
+        </div>
+
+    <header>
+        <h1>Сервис бронирования билетов</h1>
+        <div id="auth-buttons">
+            <button id="login-btn">Вход в ЛК</button>
+            <span id="user-info" style="display: none;">
+                <span id="username"></span>
+		<a href="personal-cabinet.html" id="personal-cabinet-link">Личный кабинет</a>
+                <button id="logout-btn" class="icon-button">
+    		   <img src="logout.png" alt="Иконка"></button>
+            </span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Форма авторизации -->
+        <div id="login-form" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="form-title">Войдите в аккаунт</h2>
+                <form id="auth-form">
+                    <input type="text" id="login" name="login" placeholder="введите логин" required>
+                    <input type="password" id="password" name="password" placeholder="введите пароль" required>
+                    <button type="submit">Продолжить</button>
+		    <div id="error-message" class="error-message"></div>
+                </form>
+                <p>Нет аккаунта? <a href="#" id="switch-to-register">Зарегистрироваться</a></p>
+            </div>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="register-form" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="form-title">Регистрация</h2>
+                <form id="register-form">
+                	<input type="text" id="reg-login" name="login" placeholder="придумайте логин" required>
+                	<input type="password" id="reg-password" name="password" placeholder="придумайте пароль" required>
+                	<input type="password" id="confirm-password" name="confirm-password" placeholder="подтвердите пароль" required>
+                	<input type="email" id="email" name="email" placeholder="Ваша электронная почта" required>
+                	<input type="tel" id="phone" name="phone" placeholder="+7(___)___-__-__" required>
+                	<input type="text" id="last-name" name="last-name" placeholder="Ваша фамилия" required>
+                	<input type="text" id="first-name" name="first-name" placeholder="Ваше имя" required>
+                	<input type="text" id="middle-name" name="middle-name" placeholder="Ваше отчество">
+			<label for="no-middle-name">
+                	   <input type="checkbox" id="no-middle-name"> нет отчества
+            		</label>
+                 	<button type="submit">Далее</button>
+			<div id="reg-error-message" class="error-message"></div>
+                </form>
+                <p>Уже есть аккаунт? <a href="#" id="switch-to-login">Войти</a></p>
+            </div>
+        </div>
+
+        <!-- Форма фильтров -->
+        <section id="filters">
+            <h2>Просмотр расписания</h2>
+            <form id="filter-form">
+                <div class="filter-row">
+                    <label for="arrivalCityName">Город назначения:</label>
+                    <input type="text" id="arrivalCityName" name="arrivalCityName" list="citiesList" required>
+		    <datalist id="citiesList">
+    				<!-- Города будут добавлены через JavaScript -->
+		    </datalist>
+                    <label for="departureTime">Дата отправления:</label>
+                    <input type="date" id="departureTime" name="departureTime" min="">
+
+                    <label for="arrivalTime">Дата прибытия:</label>
+                    <input type="date" id="arrivalTime" name="arrivalTime" min="">
+
+                    <button type="submit">Применить</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Расписание -->
+        <section id="schedule">
+            <table id="schedule-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Номер поезда</th>
+                        <th>Время отправления</th>
+                        <th>Время прибытия</th>
+                        <th>Город отправления</th>
+                        <th>Город прибытия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Расписание будет загружено сюда -->
+                </tbody>
+            </table>
+            <h2 id="schedule-warning" align="center" style="display: none;"><br>Для просмотра деталей нажмите на интересующий вас рейс</h2>
+        </section>
+    </main>
+
+    <footer class="fixed-footer">
+       <div class="footer-content">
+           <a href="#">Справочная информация и часто задаваемые вопросы</a><br>
+           <a href="#" id="about-developers">О разработчиках</a> |
+           <a href="#">О системе</a>
+           <div class="copyright">
+              Сервис бронирования железнодорожных билетов — Самара, 2025
+           </div>
+       </div>
+    </footer>
+
+<!-- Форма о разработчиках-->
+<div id="developers-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>О разработчиках</h2>
+        <p>Самарский университет, институт информатики и кибернетики, кафедра программных систем.<br><br>
+Курсовой проект по дисциплине "Программная инженерия" по теме "Система бронирования железнодорожных билетов".<br><br>
+Разарботку проекта вели:<br>Грумеза Румяна<br>Добрышкина Полина<br>Заикина Юлия<br>Таранец Максим<br>
+— студенты группы 6301-020302D.<br><br>При обнаружении неполадок в работе сайта, пожалуйста, свяжитесь с разработчиками.<br><br></p>
+         <a href="https://t.me/jl_zaikina" class="contact-button">Связаться с разработчиками</a>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
